@@ -1,0 +1,347 @@
+---
+title: Configuration
+description: Configure Quick Test CLI for your environment and preferences
+---
+
+Quick Test CLI provides flexible configuration options for compilation commands, timeout limits, and language-specific settings.
+
+## Command options
+
+All quicktest commands accept common configuration options that control test execution.
+
+### Test execution options
+
+<ParamField path="--test-cases" type="number" default="1000">
+  Number of test cases to generate and run.
+
+  ```bash
+  qt cmp -t main.cpp -c correct.cpp -g gen.cpp --test-cases=500
+  # Short form
+  qt cmp -t main.cpp -c correct.cpp -g gen.cpp --tc 500
+  ```
+</ParamField>
+
+<ParamField path="--timeout" type="number" default="2000">
+  Maximum execution time per test case in milliseconds.
+
+  ```bash
+  qt stress -t main.cpp -g gen.cpp --timeout=1000
+  # Short form
+  qt stress -t main.cpp -g gen.cpp --tout 1000
+  ```
+
+  <Warning>
+    Set timeouts based on your problem's time limit. For a 2-second time limit, use `--tout 2000`.
+  </Warning>
+</ParamField>
+
+<ParamField path="--memory-limit" type="number" default="1000000000">
+  Maximum memory usage in bytes (default: 1GB).
+
+  ```bash
+  qt cmp -t main.cpp -c correct.cpp -g gen.cpp --memory-limit=512000000
+  # Short form (512MB)
+  qt cmp -t main.cpp -c correct.cpp -g gen.cpp --ml 512000000
+  ```
+</ParamField>
+
+### Test case management
+
+<Tabs>
+  <Tab title="Saving test cases">
+    Control which test cases are saved to disk:
+
+    ```bash
+    # Save only failing test cases (WA, TLE, RTE)
+    qt cmp -t main.cpp -c correct.cpp -g gen.cpp --save-bad
+
+    # Save all test cases (AC and failures)
+    qt cmp -t main.cpp -c correct.cpp -g gen.cpp --save-all
+    ```
+
+    Test cases are saved in `.qt/testcases/` with the following structure:
+
+    ```
+    .qt/testcases/
+    ├── testcase_wa_001.txt
+    ├── testcase_wa_002.txt
+    ├── testcase_tle_001.txt
+    └── testcase_ac_001.txt
+    ```
+  </Tab>
+
+  <Tab title="Running saved test cases">
+    Re-run specific categories of saved test cases:
+
+    ```bash
+    # Run only wrong answer cases
+    qt cmp -t main.cpp -c correct.cpp -g gen.cpp --run-wa
+
+    # Run only time limit exceeded cases
+    qt cmp -t main.cpp -c correct.cpp -g gen.cpp --run-tle
+
+    # Run only runtime error cases
+    qt cmp -t main.cpp -c correct.cpp -g gen.cpp --run-rte
+
+    # Run only accepted cases
+    qt cmp -t main.cpp -c correct.cpp -g gen.cpp --run-ac
+
+    # Run all saved test cases
+    qt cmp -t main.cpp -c correct.cpp -g gen.cpp --run-all
+    ```
+
+    <Tip>
+      Use `--run-wa` to debug specific failing cases after fixing your code.
+    </Tip>
+  </Tab>
+
+  <Tab title="Using static test cases">
+    Test against pre-made test files instead of a generator:
+
+    ```bash
+    # Use test files with prefix "testcase_ac"
+    qt cmp -t main.cpp -c correct.cpp --prefix=test_cases/testcase_ac
+    # Short form
+    qt cmp -t main.cpp -c correct.cpp -p test_cases/testcase_ac
+    ```
+
+    <Note>
+      The `--prefix` option conflicts with `--gen-file`. Use one or the other, not both.
+    </Note>
+  </Tab>
+</Tabs>
+
+### Execution control flags
+
+<CodeGroup>
+  ```bash Break on failure
+  # Stop immediately when WA, TLE, or RTE occurs
+  qt cmp -t main.cpp -c correct.cpp -g gen.cpp --break-bad
+  # Short form
+  qt cmp -t main.cpp -c correct.cpp -g gen.cpp --break
+  ```
+
+  ```bash Show differences
+  # Display diff between expected and actual output (cmp mode only)
+  qt cmp -t main.cpp -c correct.cpp -g gen.cpp --diff
+  ```
+
+  ```bash Save output
+  # Save target output for each test case (output mode only)
+  qt output -t main.cpp -p test_cases/testcase_ac --save-out
+  ```
+</CodeGroup>
+
+## Language configuration
+
+Quick Test automatically detects your programming language based on file extensions and uses appropriate compilation commands.
+
+### Supported languages
+
+<AccordionGroup>
+  <Accordion title="C++ (GNU C++17)">
+    **Extensions**: `.cpp`, `.cc`, `.cxx`, `.c++`, `.hpp`, `.hh`, `.hxx`, `.h++`
+
+    **Compilation command**:
+    ```bash
+    g++ -std=c++17 -Wall -DONLINE_JUDGE=1 -o .qt/main main.cpp
+    ```
+
+    **Execution**:
+    ```bash
+    ./.qt/main
+    ```
+
+    <Tip>
+      The `-DONLINE_JUDGE=1` flag is automatically added to match online judge environments.
+    </Tip>
+  </Accordion>
+
+  <Accordion title="Python 3">
+    **Extensions**: `.py`
+
+    **Execution**:
+    ```bash
+    python main.py
+    ```
+
+    No compilation step required.
+  </Accordion>
+
+  <Accordion title="Java">
+    **Extensions**: `.java`
+
+    **Compilation command**:
+    ```bash
+    javac -d .qt/ Main.java
+    ```
+
+    **Execution**:
+    ```bash
+    java -cp .qt/ Main
+    ```
+
+    <Warning>
+      Your main class must be named `Main` to match the expected execution pattern.
+    </Warning>
+  </Accordion>
+
+  <Accordion title="Rust">
+    **Extensions**: `.rs`
+
+    **Compilation command**:
+    ```bash
+    cp main.rs ~/.quicktest/rust/src/main.rs && \
+    cargo build --release --quiet --manifest-path ~/.quicktest/rust/Cargo.toml && \
+    cp ~/.quicktest/rust/target/release/rust .qt/main
+    ```
+
+    **Execution**:
+    ```bash
+    ./.qt/main
+    ```
+
+    Rust compilation uses a shared Cargo project in `~/.quicktest/rust/` with common dependencies:
+    - `proconio` (input parsing)
+    - `num` (numeric types)
+    - `rand` (random generation)
+    - `regex` (pattern matching)
+    - `num-bigint` (big integers)
+  </Accordion>
+
+  <Accordion title="Go">
+    **Extensions**: `.go`
+
+    **Compilation command**:
+    ```bash
+    cp main.go ~/.quicktest/go_mod/main.go && \
+    go build -buildmode=exe -o ./.qt/main ~/.quicktest/go_mod/main.go
+    ```
+
+    **Execution**:
+    ```bash
+    ./.qt/main
+    ```
+  </Accordion>
+
+  <Accordion title="C (GNU C11)">
+    **Extensions**: `.c`, `.h`
+
+    **Compilation command**:
+    ```bash
+    gcc -std=gnu11 -lm main.c -o .qt/main
+    ```
+
+    **Execution**:
+    ```bash
+    ./.qt/main
+    ```
+
+    The `-lm` flag links the math library automatically.
+  </Accordion>
+
+  <Accordion title="Kotlin">
+    **Extensions**: `.kt`
+
+    **Compilation command**:
+    ```bash
+    kotlinc main.kt -include-runtime -d .qt/main.jar
+    ```
+
+    **Execution**:
+    ```bash
+    java -jar .qt/main.jar
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Advanced configuration
+
+### Modifying C++ compilation settings
+
+You can customize C++ compiler settings using the `setup config` command:
+
+```bash
+quicktest setup config --label=languages.cpp.compile --value="g++ -std=c++20 -O2 -Wall -o .qt/main main.cpp"
+```
+
+<Warning>
+  Advanced configuration is currently limited. Future versions will support more customization options.
+</Warning>
+
+### Environment-specific settings
+
+Quick Test adapts compilation and execution commands based on your operating system:
+
+- **Unix/Linux/macOS**: Uses binary executables (`.qt/main`)
+- **Windows**: Adds `.exe` extension (`.qt/main.exe`)
+
+### Working directory structure
+
+Quick Test creates a `.qt/` directory in your working directory:
+
+```
+my-problem/
+├── main.cpp
+├── correct.cpp
+├── gen.cpp
+└── .qt/
+    ├── main              # Compiled target binary
+    ├── correct           # Compiled correct binary
+    ├── gen               # Compiled generator binary
+    ├── input.txt         # Current test case input
+    ├── output.txt        # Current test case output
+    └── testcases/        # Saved test cases
+        ├── testcase_wa_001.txt
+        └── testcase_tle_001.txt
+```
+
+<Tip>
+  Add `.qt/` to your `.gitignore` to avoid committing generated files.
+</Tip>
+
+## Configuration examples
+
+<CodeGroup>
+  ```bash Competitive programming contest
+  # Fast iteration with immediate feedback
+  qt cmp -t main.cpp -c correct.cpp -g gen.cpp \
+    --tc 1000 \
+    --tout 1000 \
+    --break-bad \
+    --save-bad
+  ```
+
+  ```bash Debug specific failures
+  # First run: save failures
+  qt cmp -t main.cpp -c correct.cpp -g gen.cpp --save-bad
+
+  # After fixing: test only previous failures
+  qt cmp -t main.cpp -c correct.cpp -g gen.cpp --run-wa --break
+  ```
+
+  ```bash Stress testing for TLE
+  # Run many cases with tight time limit
+  qt stress -t main.cpp -g gen.cpp \
+    --tc 5000 \
+    --tout 500 \
+    --save-bad
+  ```
+
+  ```bash Memory-intensive problems
+  # Set appropriate memory limit
+  qt cmp -t main.cpp -c correct.cpp -g gen.cpp \
+    --ml 256000000  # 256 MB
+  ```
+</CodeGroup>
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Examples" icon="code" href="/guides/examples">
+    See real-world configuration in action
+  </Card>
+  <Card title="Troubleshooting" icon="wrench" href="/guides/troubleshooting">
+    Fix configuration issues
+  </Card>
+</CardGroup>

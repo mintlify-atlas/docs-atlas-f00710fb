@@ -1,0 +1,229 @@
+---
+title: GNU C Support
+description: Complete reference for GNU C language support in Quick Test CLI
+---
+
+Quick Test CLI provides full support for GNU C with automatic compilation and execution of your competitive programming solutions.
+
+## File Extension
+
+C files must use the `.c` extension:
+
+```c
+main.c
+correct.c
+gen.c
+```
+
+## Compilation
+
+C files are compiled using `gcc` with the following command:
+
+```bash
+gcc -std=gnu11 -lm main.c -o .qt/main
+```
+
+### Compilation Flags
+
+- `-std=gnu11` - Uses GNU C11 standard (C11 with GNU extensions)
+- `-lm` - Links the math library (required for functions like `sqrt`, `pow`, etc.)
+- `-o .qt/main` - Outputs the compiled binary to `.qt/main`
+
+<Note>
+The `-lm` flag is essential if you use any mathematical functions from `<math.h>`.
+</Note>
+
+## Execution
+
+After compilation, the binary is executed with:
+
+```bash
+./.qt/main
+```
+
+## Example Code
+
+Here's a typical C solution for competitive programming:
+
+```c
+#include <stdio.h>
+#include <string.h>
+#define N 100001
+int a[N];
+
+int max(int a, int b) { return a > b ? a : b; }
+int min(int a, int b) { return a < b ? a : b; }
+
+int main() {
+    int n;
+    scanf("%d", &n);
+    for(int i = 0; i < n; ++i)
+        scanf("%d", &a[i]);
+
+    int best = 0, sum = 0;
+    
+    for (int i = 0; i < n; i++) {
+        sum = max(a[i], sum + a[i]);
+        best = max(best, sum);
+    }
+    printf("%d\n", best);
+
+    return 0;
+}
+```
+
+## Usage with Quick Test
+
+### Compare Mode (cmp)
+
+Compare your solution against a brute-force correct solution:
+
+```bash
+quicktest cmp --target-file=main.c --correct-file=correct.c --gen-file=gen.c
+```
+
+### Stress Testing Mode
+
+Test your solution's performance:
+
+```bash
+quicktest stress --target-file=main.c --gen-file=gen.c --tout 1000 --tc 1000
+```
+
+### Checker Mode
+
+For problems with multiple valid answers:
+
+```bash
+quicktest check --target-file=main.c --checker-file=checker.c --gen-file=gen.c
+```
+
+## Requirements
+
+<Warning>
+You must have `gcc` (GNU Compiler Collection) installed on your system to compile C files.
+</Warning>
+
+Verify your installation:
+
+```bash
+gcc --version
+```
+
+## Common Headers
+
+```c
+#include <stdio.h>      // Standard I/O (printf, scanf)
+#include <stdlib.h>     // Memory allocation, random numbers
+#include <string.h>     // String manipulation
+#include <math.h>       // Mathematical functions
+#include <stdbool.h>    // Boolean type
+#include <limits.h>     // Integer limits (INT_MAX, INT_MIN)
+```
+
+<Info>
+Remember to use `-lm` flag when compiling if you include `<math.h>`.
+</Info>
+
+## Input/Output
+
+### Reading Input
+
+```c
+// Single integer
+int n;
+scanf("%d", &n);
+
+// Multiple integers
+int a, b, c;
+scanf("%d %d %d", &a, &b, &c);
+
+// Array
+int arr[100];
+for (int i = 0; i < n; i++) {
+    scanf("%d", &arr[i]);
+}
+
+// String
+char s[1000];
+scanf("%s", s);  // Note: no & for strings
+```
+
+### Writing Output
+
+```c
+// Integer
+printf("%d\n", x);
+
+// Long long
+printf("%lld\n", x);
+
+// Multiple values
+printf("%d %d\n", a, b);
+
+// Formatted
+printf("%.2f\n", pi);  // 2 decimal places
+```
+
+## Helper Functions
+
+C doesn't have built-in min/max macros, so define them:
+
+```c
+int max(int a, int b) { return a > b ? a : b; }
+int min(int a, int b) { return a < b ? a : b; }
+
+long long maxll(long long a, long long b) { return a > b ? a : b; }
+long long minll(long long a, long long b) { return a < b ? a : b; }
+```
+
+Or use macros:
+
+```c
+#define max(a, b) ((a) > (b) ? (a) : (b))
+#define min(a, b) ((a) < (b) ? (a) : (b))
+```
+
+<Warning>
+When using macros, always wrap parameters in parentheses to avoid operator precedence issues.
+</Warning>
+
+## Memory Management
+
+### Dynamic Arrays
+
+```c
+// Allocate
+int *arr = (int*)malloc(n * sizeof(int));
+
+// Use
+for (int i = 0; i < n; i++) {
+    arr[i] = i;
+}
+
+// Free (important!)
+free(arr);
+```
+
+<Tip>
+For competitive programming, you can often use static arrays with a large size instead of dynamic allocation for simplicity.
+</Tip>
+
+## C vs C++
+
+While C and C++ are similar, there are key differences:
+
+- C requires explicit type casting for malloc
+- No STL containers (vector, map, set, etc.)
+- Must use `scanf`/`printf` instead of `cin`/`cout`
+- C99/C11 added features like `bool`, inline variable declarations
+
+## Performance
+
+C compiled with gcc produces highly optimized native code with excellent performance, often comparable to or better than C++.
+
+## Platform Support
+
+- **Linux**: Full support
+- **Windows**: Full support
+- **macOS**: Full support

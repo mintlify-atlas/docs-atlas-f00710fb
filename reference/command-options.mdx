@@ -1,0 +1,530 @@
+---
+title: Command Options
+description: Complete reference of all command-line options for Quick Test CLI
+---
+
+This page provides a comprehensive reference for all command-line options available in Quick Test CLI.
+
+## Global Commands
+
+Quick Test CLI provides several subcommands for different testing scenarios:
+
+- `stress` - Verify code execution time and memory usage
+- `cmp` - Compare target file with correct solution
+- `check` - Validate answers using a custom checker script
+- `output` - Run test cases and generate output files
+- `setup` - Configure Quick Test settings
+- `example` - Show usage examples for subcommands
+
+---
+
+## Stress Command
+
+Verify that the code execution time does not exceed what is allowed.
+
+### Usage
+
+```bash
+quicktest stress --target-file <FILE> [OPTIONS]
+```
+
+### Required Options
+
+<ParamField path="--target-file" type="path" required>
+  The target file to test. This is the solution you want to verify.
+  
+  **Short flag:** `-t`
+  
+  **Example:** `--target-file solution.cpp`
+</ParamField>
+
+### Optional Parameters
+
+<ParamField path="--gen-file" type="path" default="">
+  Generator file that produces random test cases.
+  
+  **Short flag:** `-g`
+  
+  **Example:** `--gen-file generator.cpp`
+</ParamField>
+
+<ParamField path="--timeout" type="u32" default="2000">
+  Maximum execution time allowed in milliseconds.
+  
+  **Alias:** `--tout`
+  
+  **Example:** `--timeout 3000`
+</ParamField>
+
+<ParamField path="--memory-limit" type="u64" default="1000000000">
+  Maximum memory allowed in bytes (default: 1GB).
+  
+  **Alias:** `--ml`
+  
+  **Example:** `--memory-limit 512000000`
+</ParamField>
+
+<ParamField path="--test-cases" type="u32" default="1000">
+  Number of test cases to run.
+  
+  **Alias:** `--tc`
+  
+  **Example:** `--test-cases 500`
+</ParamField>
+
+<ParamField path="--prefix" type="string" default="">
+  Prefix for saved test case files.
+  
+  **Short flag:** `-p`
+  
+  **Example:** `--prefix my_test`
+</ParamField>
+
+### Behavior Flags
+
+<ParamField path="--break-bad" type="boolean">
+  Break execution if TLE or RTE status occurs.
+  
+  **Short flag:** `-b`
+  
+  **Alias:** `--break`
+</ParamField>
+
+<ParamField path="--save-bad" type="boolean">
+  Save only test cases with WA, TLE, or RTE status.
+  
+  **Conflicts with:** `--save-all`
+</ParamField>
+
+<ParamField path="--save-all" type="boolean">
+  Save all test cases regardless of status.
+  
+  **Conflicts with:** `--save-bad`
+</ParamField>
+
+### Run Filters
+
+<ParamField path="--run-all" type="boolean">
+  Run all saved test cases.
+</ParamField>
+
+<ParamField path="--run-ac" type="boolean">
+  Run only test cases with Accepted status.
+</ParamField>
+
+<ParamField path="--run-wa" type="boolean">
+  Run only test cases with Wrong Answer status.
+</ParamField>
+
+<ParamField path="--run-tle" type="boolean">
+  Run only test cases with Time Limit Exceeded status.
+</ParamField>
+
+<ParamField path="--run-rte" type="boolean">
+  Run only test cases with Runtime Error status.
+</ParamField>
+
+<ParamField path="--run-mle" type="boolean">
+  Run only test cases with Memory Limit Exceeded status.
+</ParamField>
+
+---
+
+## Cmp Command
+
+Check the correctness of the target file by comparing it with a correct solution.
+
+### Usage
+
+```bash
+quicktest cmp --target-file <FILE> --correct-file <FILE> [OPTIONS]
+```
+
+### Required Options
+
+<ParamField path="--target-file" type="path" required>
+  The target file to test.
+  
+  **Short flag:** `-t`
+  
+  **Example:** `--target-file solution.cpp`
+</ParamField>
+
+<ParamField path="--correct-file" type="path" required>
+  The correct solution file to compare against.
+  
+  **Short flag:** `-c`
+  
+  **Example:** `--correct-file correct.cpp`
+</ParamField>
+
+### Optional Parameters
+
+<ParamField path="--gen-file" type="path" default="">
+  Generator file that produces random test cases.
+  
+  **Short flag:** `-g`
+  
+  **Example:** `--gen-file generator.cpp`
+</ParamField>
+
+<ParamField path="--timeout" type="u32" default="2000">
+  Maximum execution time allowed in milliseconds.
+  
+  **Alias:** `--tout`
+  
+  **Example:** `--timeout 3000`
+</ParamField>
+
+<ParamField path="--memory-limit" type="u64" default="1000000000">
+  Maximum memory allowed in bytes (default: 1GB).
+  
+  **Alias:** `--ml`
+  
+  **Example:** `--memory-limit 512000000`
+</ParamField>
+
+<ParamField path="--test-cases" type="u32" default="1000">
+  Number of test cases to run.
+  
+  **Alias:** `--tc`
+  
+  **Example:** `--test-cases 500`
+</ParamField>
+
+<ParamField path="--prefix" type="string" default="">
+  Prefix for saved test case files.
+  
+  **Short flag:** `-p`
+  
+  **Example:** `--prefix my_test`
+</ParamField>
+
+### Behavior Flags
+
+<ParamField path="--break-bad" type="boolean">
+  Break execution if WA, TLE, or RTE status occurs.
+  
+  **Short flag:** `-b`
+  
+  **Alias:** `--break`
+</ParamField>
+
+<ParamField path="--save-bad" type="boolean">
+  Save only test cases with WA, TLE, or RTE status.
+  
+  **Conflicts with:** `--save-all`
+</ParamField>
+
+<ParamField path="--save-all" type="boolean">
+  Save all test cases regardless of status.
+  
+  **Conflicts with:** `--save-bad`
+</ParamField>
+
+<ParamField path="--diff" type="boolean">
+  Show differences between expected and actual output.
+  
+  **Short flag:** `-d`
+</ParamField>
+
+### Run Filters
+
+<ParamField path="--run-all" type="boolean">
+  Run all saved test cases.
+</ParamField>
+
+<ParamField path="--run-ac" type="boolean">
+  Run only test cases with Accepted status.
+</ParamField>
+
+<ParamField path="--run-wa" type="boolean">
+  Run only test cases with Wrong Answer status.
+</ParamField>
+
+<ParamField path="--run-tle" type="boolean">
+  Run only test cases with Time Limit Exceeded status.
+</ParamField>
+
+<ParamField path="--run-rte" type="boolean">
+  Run only test cases with Runtime Error status.
+</ParamField>
+
+<ParamField path="--run-mle" type="boolean">
+  Run only test cases with Memory Limit Exceeded status.
+</ParamField>
+
+---
+
+## Check Command
+
+Check the correctness of answers using a custom checker script. Useful for problems that don't have a unique answer.
+
+### Usage
+
+```bash
+quicktest check --target-file <FILE> --checker-file <FILE> [OPTIONS]
+```
+
+### Required Options
+
+<ParamField path="--target-file" type="path" required>
+  The target file to test.
+  
+  **Short flag:** `-t`
+  
+  **Example:** `--target-file solution.cpp`
+</ParamField>
+
+<ParamField path="--checker-file" type="path" required>
+  The checker script that validates the output.
+  
+  **Short flag:** `-c`
+  
+  **Example:** `--checker-file checker.cpp`
+</ParamField>
+
+### Optional Parameters
+
+<ParamField path="--gen-file" type="path" default="">
+  Generator file that produces random test cases.
+  
+  **Short flag:** `-g`
+  
+  **Example:** `--gen-file generator.cpp`
+</ParamField>
+
+<ParamField path="--timeout" type="u32" default="2000">
+  Maximum execution time allowed in milliseconds.
+  
+  **Alias:** `--tout`
+  
+  **Example:** `--timeout 3000`
+</ParamField>
+
+<ParamField path="--memory-limit" type="u64" default="1000000000">
+  Maximum memory allowed in bytes (default: 1GB).
+  
+  **Alias:** `--ml`
+  
+  **Example:** `--memory-limit 512000000`
+</ParamField>
+
+<ParamField path="--test-cases" type="u32" default="1000">
+  Number of test cases to run.
+  
+  **Alias:** `--tc`
+  
+  **Example:** `--test-cases 500`
+</ParamField>
+
+<ParamField path="--prefix" type="string" default="">
+  Prefix for saved test case files.
+  
+  **Short flag:** `-p`
+  
+  **Example:** `--prefix my_test`
+</ParamField>
+
+### Behavior Flags
+
+<ParamField path="--break-bad" type="boolean">
+  Break execution if WA, TLE, or RTE status occurs.
+  
+  **Short flag:** `-b`
+  
+  **Alias:** `--break`
+</ParamField>
+
+<ParamField path="--save-bad" type="boolean">
+  Save only test cases with WA, TLE, or RTE status.
+  
+  **Conflicts with:** `--save-all`
+</ParamField>
+
+<ParamField path="--save-all" type="boolean">
+  Save all test cases regardless of status.
+  
+  **Conflicts with:** `--save-bad`
+</ParamField>
+
+### Run Filters
+
+<ParamField path="--run-all" type="boolean">
+  Run all saved test cases.
+</ParamField>
+
+<ParamField path="--run-ac" type="boolean">
+  Run only test cases with Accepted status.
+</ParamField>
+
+<ParamField path="--run-wa" type="boolean">
+  Run only test cases with Wrong Answer status.
+</ParamField>
+
+<ParamField path="--run-tle" type="boolean">
+  Run only test cases with Time Limit Exceeded status.
+</ParamField>
+
+<ParamField path="--run-rte" type="boolean">
+  Run only test cases with Runtime Error status.
+</ParamField>
+
+<ParamField path="--run-mle" type="boolean">
+  Run only test cases with Memory Limit Exceeded status.
+</ParamField>
+
+---
+
+## Output Command
+
+Run test cases and create an output file for each test case.
+
+### Usage
+
+```bash
+quicktest output --target-file <FILE> --prefix <PREFIX> [OPTIONS]
+```
+
+### Required Options
+
+<ParamField path="--target-file" type="path" required>
+  The target file to execute.
+  
+  **Short flag:** `-t`
+  
+  **Example:** `--target-file solution.cpp`
+</ParamField>
+
+<ParamField path="--prefix" type="string" required>
+  Prefix for output files.
+  
+  **Short flag:** `-p`
+  
+  **Example:** `--prefix test_output`
+</ParamField>
+
+### Optional Parameters
+
+<ParamField path="--timeout" type="u32" default="2000">
+  Maximum execution time allowed in milliseconds.
+  
+  **Alias:** `--tout`
+  
+  **Example:** `--timeout 3000`
+</ParamField>
+
+<ParamField path="--memory-limit" type="u64" default="1000000000">
+  Maximum memory allowed in bytes (default: 1GB).
+  
+  **Alias:** `--ml`
+  
+  **Example:** `--memory-limit 512000000`
+</ParamField>
+
+### Behavior Flags
+
+<ParamField path="--break-bad" type="boolean">
+  Break execution if TLE or RTE status occurs.
+  
+  **Short flag:** `-b`
+  
+  **Alias:** `--break`
+</ParamField>
+
+<ParamField path="--save-out" type="boolean">
+  Save the output of the target file for each test case.
+</ParamField>
+
+---
+
+## Setup Command
+
+Configure Quick Test settings and language configurations.
+
+### Config Subcommand
+
+Update configuration settings.
+
+#### Usage
+
+```bash
+quicktest setup config --label <LABEL> --value <VALUE>
+```
+
+<ParamField path="--label" type="string" required>
+  Label of the configuration to update. Format: `Language.SETTING`
+  
+  **Short flag:** `-l`
+  
+  **Example:** `--label "cpp.PROGRAM"`
+</ParamField>
+
+<ParamField path="--value" type="string" required>
+  Value to set for the configuration.
+  
+  **Short flag:** `-v`
+  
+  **Example:** `--value "g++"`
+</ParamField>
+
+#### Examples
+
+```bash
+# Configure C++ compiler
+quicktest setup config --label="cpp.PROGRAM" --value="g++"
+
+# Set C++ standard
+quicktest setup config --label="cpp.STANDARD" --value="-std=c++17"
+
+# Configure Python interpreter
+quicktest setup config --label="python.PROGRAM" --value="python3"
+```
+
+### Reset Subcommand
+
+Reset all settings to defaults.
+
+#### Usage
+
+```bash
+quicktest setup reset
+```
+
+This removes the configuration file at `~/.quicktest/languages.config.json`.
+
+---
+
+## Example Command
+
+Show usage examples for specific subcommands.
+
+### Usage
+
+```bash
+quicktest example --<SUBCOMMAND>
+```
+
+<ParamField path="--stress" type="boolean">
+  Show examples for the stress subcommand.
+</ParamField>
+
+<ParamField path="--cmp" type="boolean">
+  Show examples for the cmp subcommand.
+</ParamField>
+
+<ParamField path="--check" type="boolean">
+  Show examples for the check subcommand.
+</ParamField>
+
+<ParamField path="--output" type="boolean">
+  Show examples for the output subcommand.
+</ParamField>
+
+<ParamField path="--setup" type="boolean">
+  Show examples for the setup subcommand.
+</ParamField>
+
+<Note>
+  Exactly one subcommand flag must be specified.
+</Note>

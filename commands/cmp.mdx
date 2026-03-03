@@ -1,0 +1,361 @@
+---
+title: "cmp"
+description: "Compare your solution against a brute-force reference implementation"
+---
+
+## Overview
+
+The `cmp` command verifies the correctness of your optimized solution by comparing its output against a slower but proven-correct brute-force implementation across multiple randomly generated test cases.
+
+<Info>
+This is the most common stress testing mode for competitive programming, allowing you to catch edge cases that your optimized solution might handle incorrectly.
+</Info>
+
+## Basic Usage
+
+```bash
+quicktest cmp --target-file=main.cpp --correct-file=correct.cpp --gen-file=gen.cpp
+```
+
+Or using the shorter alias:
+
+```bash
+qt cmp -t main.cpp -c correct.cpp -g gen.cpp
+```
+
+## Required Parameters
+
+<ParamField path="target-file" type="string" required>
+  Your optimized solution file to test. Can be any supported language (C++, Java, Python, Rust, Go, C, Kotlin).
+  
+  **Short form:** `-t`
+  
+  ```bash
+  --target-file=main.cpp
+  -t main.cpp
+  ```
+</ParamField>
+
+<ParamField path="correct-file" type="string" required>
+  The brute-force or known-correct reference implementation. This solution should always produce correct output, even if it's slower.
+  
+  **Short form:** `-c`
+  
+  ```bash
+  --correct-file=correct.cpp
+  -c correct.cpp
+  ```
+</ParamField>
+
+<ParamField path="gen-file" type="string" required>
+  Random test case generator file. Generates input data for testing.
+  
+  **Short form:** `-g`
+  
+  **Default:** `""` (empty - can use `--prefix` instead)
+  
+  <Note>
+  The generator and prefix options are mutually exclusive. Use either `--gen-file` for random generation or `--prefix` to run existing test cases.
+  </Note>
+  
+  ```bash
+  --gen-file=gen.cpp
+  -g gen.cpp
+  ```
+</ParamField>
+
+## Optional Parameters
+
+<ParamField path="test-cases" type="number" default="1000">
+  Number of test cases to generate and run.
+  
+  **Alias:** `--tc`
+  
+  ```bash
+  --test-cases=500
+  --tc 500
+  ```
+</ParamField>
+
+<ParamField path="timeout" type="number" default="2000">
+  Maximum execution time per test case in milliseconds.
+  
+  **Alias:** `--tout`
+  
+  ```bash
+  --timeout=1000
+  --tout 1000
+  ```
+</ParamField>
+
+<ParamField path="memory-limit" type="number" default="1000000000">
+  Memory limit in bytes (default is 1GB).
+  
+  **Alias:** `--ml`
+  
+  ```bash
+  --memory-limit=512000000
+  --ml 512000000
+  ```
+</ParamField>
+
+<ParamField path="prefix" type="string" default="">
+  Path prefix for existing test case files. Use this to run against pre-existing test cases instead of generating random ones.
+  
+  **Short form:** `-p`
+  
+  **Conflicts with:** `--gen-file`
+  
+  ```bash
+  --prefix=test_cases/testcase_ac
+  -p test_cases/testcase_ac
+  ```
+</ParamField>
+
+<ParamField path="diff" type="boolean" default="false">
+  Show detailed differences between expected output and actual output when tests fail.
+  
+  **Short form:** `-d`
+  
+  ```bash
+  --diff
+  -d
+  ```
+</ParamField>
+
+## Control Flags
+
+<ParamField path="break-bad" type="boolean" default="false">
+  Stop execution immediately when a WA (Wrong Answer), TLE (Time Limit Exceeded), or RTE (Runtime Error) occurs.
+  
+  **Aliases:** `--break`, `-b`
+  
+  ```bash
+  --break-bad
+  --break
+  -b
+  ```
+</ParamField>
+
+## Save Options
+
+<Warning>
+The `--save-all` and `--save-bad` flags are mutually exclusive.
+</Warning>
+
+<ParamField path="save-bad" type="boolean" default="false">
+  Save only test cases that fail (WA, TLE, RTE, MLE states).
+  
+  ```bash
+  --save-bad
+  ```
+</ParamField>
+
+<ParamField path="save-all" type="boolean" default="false">
+  Save all test cases regardless of their result.
+  
+  ```bash
+  --save-all
+  ```
+</ParamField>
+
+## Run Filters
+
+Use these flags to run specific subsets of previously saved test cases:
+
+<ParamField path="run-all" type="boolean" default="false">
+  Run all saved test cases.
+</ParamField>
+
+<ParamField path="run-ac" type="boolean" default="false">
+  Run only test cases that previously passed (Accepted status).
+</ParamField>
+
+<ParamField path="run-wa" type="boolean" default="false">
+  Run only test cases that previously failed with Wrong Answer.
+</ParamField>
+
+<ParamField path="run-tle" type="boolean" default="false">
+  Run only test cases that previously exceeded time limit.
+</ParamField>
+
+<ParamField path="run-mle" type="boolean" default="false">
+  Run only test cases that previously exceeded memory limit.
+</ParamField>
+
+<ParamField path="run-rte" type="boolean" default="false">
+  Run only test cases that previously had runtime errors.
+</ParamField>
+
+## Examples
+
+### Basic Comparison Test
+
+<CodeGroup>
+```bash C++
+qt cmp -t main.cpp -c correct.cpp -g gen.cpp --tc 500 --tout 1000
+```
+
+```bash Python
+qt cmp -t main.py -c correct.py -g gen.py --tc 200 --tout 1000
+```
+
+```bash Java
+qt cmp -t Main.java -c Correct.java -g Gen.java --tc 500 --tout 1000
+```
+
+```bash Rust
+qt cmp -t main.rs -c correct.rs -g gen.rs --tc 500 --tout 1000
+```
+</CodeGroup>
+
+### Save and Debug Failed Cases
+
+<Steps>
+  <Step title="Run with save-bad flag">
+    First, run the test and save only failing cases:
+    
+    ```bash
+    qt cmp -t main.cpp -c correct.cpp -g gen.cpp --tc 500 --tout 1000 --save-bad
+    ```
+  </Step>
+  
+  <Step title="Review failures with diff">
+    Re-run the failing cases with diff output to see exact differences:
+    
+    ```bash
+    qt cmp -t main.cpp -c correct.cpp -g gen.cpp --run-wa --diff
+    ```
+  </Step>
+  
+  <Step title="Test the fix">
+    After fixing your code, run only the previously failing cases:
+    
+    ```bash
+    qt cmp -t main.cpp -c correct.cpp -g gen.cpp --run-wa
+    ```
+  </Step>
+</Steps>
+
+### Maximum Subarray Problem Example
+
+Here's a complete example testing an optimized Maximum Subarray solution:
+
+<CodeGroup>
+```cpp main.cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    int n; cin >> n;
+    vector<int> values(n);
+    for(int &a: values)
+        cin >> a;
+    
+    int best = 0, sum = 0;
+    for (int i = 0; i < n; i++) {
+        sum = max(values[i], sum + values[i]);
+        best = max(best, sum);
+    }
+    cout << best << "\n";
+    return 0;
+}
+```
+
+```cpp correct.cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    // Brute force O(n²) solution
+    int n; cin >> n;
+    vector<int> values(n);
+    for(int &a: values)
+        cin >> a;
+    
+    int best = 0;
+    for (int i = 0; i < n; i++) {
+        int sum = 0;
+        for (int j = i; j < n; j++) {
+            sum += values[j];
+            best = max(best, sum);
+        }
+    }
+    cout << best << "\n";
+    return 0;
+}
+```
+
+```cpp gen.cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+int main(int argc, char* argv[]) {
+    int seed = stoi(string(argv[1]));
+    srand(seed);
+
+    const int N = int(1e3);
+    const int Ai = int(1e5);
+
+    int n = rand() % N + 1;
+    cout << n << "\n";
+
+    default_random_engine generator;
+    uniform_int_distribution<int> distribution(-Ai, Ai);
+
+    for(int i = 0; i < n; i++) {
+        if(i > 0) cout << " ";
+        cout << distribution(generator);
+    }
+    return 0;
+}
+```
+</CodeGroup>
+
+Run the test:
+
+```bash
+qt cmp -t main.cpp -c correct.cpp -g gen.cpp --tc 1000 --tout 2000 --break-bad
+```
+
+### Using Existing Test Cases
+
+Run against pre-existing test files:
+
+```bash
+qt cmp -t main.cpp -c correct.cpp -p test_cases/testcase --tc 10
+```
+
+<Tip>
+When using `--prefix`, QuickTest looks for files named like `testcase_01.txt`, `testcase_02.txt`, etc.
+</Tip>
+
+## Understanding Test Results
+
+QuickTest displays real-time results with status indicators:
+
+- **AC** - Accepted (correct answer)
+- **WA** - Wrong Answer
+- **TLE** - Time Limit Exceeded
+- **MLE** - Memory Limit Exceeded
+- **RTE** - Runtime Error
+
+## Tips
+
+<Tip>
+**Start small, then scale up:** Begin with a small number of test cases (e.g., `--tc 100`) to verify your setup works, then increase to 1000+ for thorough testing.
+</Tip>
+
+<Tip>
+**Use --break-bad during development:** When fixing bugs, use the `--break-bad` flag to stop at the first failure for faster debugging cycles.
+</Tip>
+
+<Tip>
+**Combine with --diff for debugging:** The `--diff` flag shows you exactly where outputs diverge, making it easier to spot the issue.
+</Tip>
+
+## See Also
+
+- [stress](/commands/stress) - Test for time/memory limits without comparing outputs
+- [check](/commands/check) - Use custom checker for problems with multiple valid answers
+- [output](/commands/output) - Generate output files from test cases

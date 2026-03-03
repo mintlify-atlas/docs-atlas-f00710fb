@@ -1,0 +1,177 @@
+---
+title: Rust Support
+description: Complete reference for Rust language support in Quick Test CLI
+---
+
+Quick Test CLI provides full support for Rust with automatic compilation and execution of your competitive programming solutions.
+
+## File Extension
+
+Rust files must use the `.rs` extension:
+
+```rust
+main.rs
+correct.rs
+gen.rs
+```
+
+## Compilation
+
+Rust files are compiled using `cargo` with a special workflow:
+
+```bash
+cp main.rs ~/.quicktest/rust/src/main.rs && \
+cargo build --release --quiet --manifest-path ~/.quicktest/rust/Cargo.toml && \
+cp ~/.quicktest/rust/target/release/rust .qt/main
+```
+
+### Compilation Process
+
+1. **Copy source file** to `~/.quicktest/rust/src/main.rs`
+2. **Build with cargo** using the release profile for optimizations
+3. **Copy binary** from the target directory to `.qt/main`
+
+<Info>
+Quick Test CLI uses a pre-configured Cargo project in `~/.quicktest/rust/` to manage Rust dependencies.
+</Info>
+
+## Execution
+
+After compilation, the binary is executed with:
+
+```bash
+./.qt/main
+```
+
+## Configuration File
+
+The Cargo configuration is located at `~/.quicktest/rust/Cargo.toml`:
+
+```toml
+[package]
+name = "rust"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+proconio = "0.4.3"
+num = "0.4.0"
+rand = { version = "0.8.5", features = ["small_rng"]}
+regex = "1.5.5"
+num-bigint = "0.4.3"
+```
+
+### Available Dependencies
+
+The default configuration includes common competitive programming libraries:
+
+- **proconio** - Fast and convenient input parsing
+- **num** - Numeric types and traits
+- **rand** - Random number generation
+- **regex** - Regular expressions
+- **num-bigint** - Arbitrary precision integers
+
+<Tip>
+You can modify `~/.quicktest/rust/Cargo.toml` to add additional dependencies needed for your solutions.
+</Tip>
+
+## Example Code
+
+Here's a typical Rust solution for competitive programming:
+
+```rust
+#![allow(warnings, unused)]
+use proconio::input;
+use std::cmp::{min, max};
+
+fn main() {
+    input! {
+        n: i64,
+        values: [i64; n],
+    }
+    
+    let mut best = 0;
+    let mut sum = 0;
+    
+    for i in 0..n {
+        sum = max(values[i as usize], sum + values[i as usize]);
+        best = max(best, sum);
+    }
+    
+    println!("{}", best);
+}
+```
+
+## Usage with Quick Test
+
+### Compare Mode (cmp)
+
+Compare your solution against a brute-force correct solution:
+
+```bash
+quicktest cmp --target-file=main.rs --correct-file=correct.rs --gen-file=gen.rs
+```
+
+### Stress Testing Mode
+
+Test your solution's performance:
+
+```bash
+quicktest stress --target-file=main.rs --gen-file=gen.rs --tout 1000 --tc 1000
+```
+
+### Checker Mode
+
+For problems with multiple valid answers:
+
+```bash
+quicktest check --target-file=main.rs --checker-file=checker.rs --gen-file=gen.rs
+```
+
+## Requirements
+
+<Warning>
+You must have Rust and Cargo installed on your system to compile Rust files.
+</Warning>
+
+Verify your installation:
+
+```bash
+rustc --version
+cargo --version
+```
+
+### Installing Rust
+
+If you don't have Rust installed, visit [rustup.rs](https://rustup.rs/) for installation instructions.
+
+## Using Proconio for Input
+
+The `proconio` crate provides a convenient macro for reading input:
+
+```rust
+use proconio::input;
+
+fn main() {
+    input! {
+        n: usize,
+        m: usize,
+        edges: [(usize, usize); m],
+    }
+    // Your code here
+}
+```
+
+<Note>
+Proconio automatically handles whitespace and newlines, making input parsing much simpler than using standard Rust I/O.
+</Note>
+
+## Performance
+
+Rust's compiled binaries are highly optimized and perform comparably to C++. The `--release` flag ensures all optimizations are enabled.
+
+## Platform Support
+
+- **Linux**: Full support
+- **Windows**: Full support
+- **macOS**: Full support

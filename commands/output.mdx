@@ -1,0 +1,383 @@
+---
+title: "output"
+description: "Generate output files from test cases for offline validation or analysis"
+---
+
+## Overview
+
+The `output` command runs your solution against existing test cases and optionally saves the output to files. This is useful for generating answer files, debugging specific test cases, or preparing submissions that require output files.
+
+<Info>
+Unlike other commands, `output` doesn't generate random test cases—it only runs against existing test files specified by a prefix.
+</Info>
+
+## Basic Usage
+
+```bash
+quicktest output --target-file=main.cpp --prefix=test_cases/testcase_ac
+```
+
+Or using the shorter alias:
+
+```bash
+qt output -t main.cpp -p test_cases/testcase_ac
+```
+
+## Required Parameters
+
+<ParamField path="target-file" type="string" required>
+  Your solution file to run. Can be any supported language (C++, Java, Python, Rust, Go, C, Kotlin).
+  
+  **Short form:** `-t`
+  
+  ```bash
+  --target-file=main.cpp
+  -t main.cpp
+  ```
+</ParamField>
+
+<ParamField path="prefix" type="string" required>
+  Path prefix for existing test case files. QuickTest will find all files matching this prefix pattern.
+  
+  **Short form:** `-p`
+  
+  ```bash
+  --prefix=test_cases/testcase_ac
+  -p test_cases/testcase_ac
+  ```
+  
+  <Note>
+  If your test files are named `testcase_ac_01.txt`, `testcase_ac_02.txt`, etc., use `--prefix=testcase_ac` and QuickTest will automatically find all matching files.
+  </Note>
+</ParamField>
+
+## Optional Parameters
+
+<ParamField path="timeout" type="number" default="2000">
+  Maximum execution time per test case in milliseconds.
+  
+  **Alias:** `--tout`
+  
+  ```bash
+  --timeout=1000
+  --tout 1000
+  ```
+</ParamField>
+
+<ParamField path="memory-limit" type="number" default="1000000000">
+  Memory limit in bytes (default is 1GB).
+  
+  **Alias:** `--ml`
+  
+  ```bash
+  --memory-limit=512000000
+  --ml 512000000
+  ```
+</ParamField>
+
+## Control Flags
+
+<ParamField path="break-bad" type="boolean" default="false">
+  Stop execution immediately when a TLE (Time Limit Exceeded) or RTE (Runtime Error) occurs.
+  
+  **Aliases:** `--break`, `-b`
+  
+  ```bash
+  --break-bad
+  --break
+  -b
+  ```
+</ParamField>
+
+<ParamField path="save-out" type="boolean" default="false">
+  Save the output of the target file for each test case to a file.
+  
+  ```bash
+  --save-out
+  ```
+</ParamField>
+
+## Examples
+
+### Run Tests Without Saving Output
+
+Simply execute your solution on all test cases:
+
+<CodeGroup>
+```bash C++
+qt output -t main.cpp -p test_cases/testcase_ac
+```
+
+```bash Python
+qt output -t main.py -p test_cases/testcase_ac
+```
+
+```bash Rust
+qt output -t main.rs -p test_cases/testcase_ac
+```
+</CodeGroup>
+
+### Generate Output Files
+
+Create output files for each test case:
+
+```bash
+qt output -t main.cpp -p test_cases/testcase_ac --save-out
+```
+
+This will create output files alongside your test inputs.
+
+### Complete Example
+
+Suppose you have these test files:
+```
+test_cases/
+  testcase_ac_01.txt
+  testcase_ac_02.txt
+  testcase_ac_03.txt
+```
+
+<CodeGroup>
+```cpp main.cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    int n; cin >> n;
+    vector<int> values(n);
+    for(int &a: values)
+        cin >> a;
+    
+    int best = 0, sum = 0;
+    for (int i = 0; i < n; i++) {
+        sum = max(values[i], sum + values[i]);
+        best = max(best, sum);
+    }
+    cout << best << "\n";
+    return 0;
+}
+```
+
+```txt testcase_ac_01.txt
+5
+-1 2 4 -3 5
+```
+
+```txt testcase_ac_02.txt
+4
+1 2 3 4
+```
+
+```txt testcase_ac_03.txt
+3
+-5 -2 -3
+```
+</CodeGroup>
+
+Run and save outputs:
+
+```bash
+qt output -t main.cpp -p test_cases/testcase_ac --save-out
+```
+
+This generates:
+```
+test_cases/
+  testcase_ac_01.txt
+  testcase_ac_01.out.txt  (contains: 8)
+  testcase_ac_02.txt
+  testcase_ac_02.out.txt  (contains: 10)
+  testcase_ac_03.txt
+  testcase_ac_03.out.txt  (contains: 0)
+```
+
+### Using Different Prefixes
+
+You can run different test sets separately:
+
+```bash
+# Run only accepted test cases
+qt output -t main.cpp -p test_cases/testcase_ac
+
+# Run only edge cases
+qt output -t main.cpp -p test_cases/edge_case
+
+# Run only large inputs
+qt output -t main.cpp -p test_cases/large --tout 3000
+```
+
+### With Subdirectories
+
+```bash
+qt output -t cpp/main.cpp -p test_cases/testcase_ac --save-out
+```
+
+### Stop on First Error
+
+Halt immediately if any test case fails:
+
+```bash
+qt output -t main.cpp -p test_cases/testcase_ac --break-bad --save-out
+```
+
+### Custom Time Limits
+
+For problems with strict time constraints:
+
+```bash
+qt output -t main.cpp -p test_cases/testcase_ac --tout 500 --save-out
+```
+
+## Workflow Examples
+
+### Generate Reference Outputs
+
+<Steps>
+  <Step title="Prepare test inputs">
+    Create your test case files with a consistent naming pattern:
+    ```
+    testcase_01.txt
+    testcase_02.txt
+    testcase_03.txt
+    ```
+  </Step>
+  
+  <Step title="Run output command">
+    Generate output files:
+    ```bash
+    qt output -t correct.cpp -p testcase --save-out
+    ```
+  </Step>
+  
+  <Step title="Use outputs for validation">
+    Now you have reference outputs to compare against:
+    ```
+    testcase_01.txt → testcase_01.out.txt
+    testcase_02.txt → testcase_02.out.txt
+    testcase_03.txt → testcase_03.out.txt
+    ```
+  </Step>
+</Steps>
+
+### Debug Specific Test Cases
+
+<Steps>
+  <Step title="Identify failing test">
+    After running `cmp` or `check`, you have saved test cases that failed.
+  </Step>
+  
+  <Step title="Run output on that specific case">
+    ```bash
+    qt output -t main.cpp -p saved_tests/testcase_wa_01 --save-out
+    ```
+  </Step>
+  
+  <Step title="Examine the output">
+    Review the generated output file to understand what your solution produced.
+  </Step>
+</Steps>
+
+### Batch Processing
+
+Process multiple test sets:
+
+```bash
+# Generate outputs for all accepted cases
+qt output -t main.cpp -p test_cases/testcase_ac --save-out
+
+# Generate outputs for all wrong answer cases
+qt output -t main.cpp -p test_cases/testcase_wa --save-out
+
+# Generate outputs for edge cases
+qt output -t main.cpp -p test_cases/edge --save-out
+```
+
+## Common Use Cases
+
+<CardGroup cols={2}>
+  <Card title="Answer File Generation" icon="file-export">
+    Create expected output files for test cases
+  </Card>
+  
+  <Card title="Debugging" icon="bug">
+    See exactly what your solution outputs for specific inputs
+  </Card>
+  
+  <Card title="Regression Testing" icon="code-compare">
+    Verify outputs don't change after refactoring
+  </Card>
+  
+  <Card title="Submission Preparation" icon="upload">
+    Some contests require pre-generated output files
+  </Card>
+</CardGroup>
+
+## Understanding Output Files
+
+When using `--save-out`, QuickTest creates output files with this naming pattern:
+
+```
+Input file:   testcase_ac_01.txt
+Output file:  testcase_ac_01.out.txt
+```
+
+The output file contains exactly what your program printed to stdout.
+
+## Test Results
+
+QuickTest displays status for each test case:
+
+- **AC** - Accepted (completed successfully)
+- **TLE** - Time Limit Exceeded
+- **MLE** - Memory Limit Exceeded
+- **RTE** - Runtime Error
+
+<Note>
+Since `output` doesn't compare against expected results, you won't see **WA** (Wrong Answer) status. It only indicates whether your program ran successfully.
+</Note>
+
+## Tips
+
+<Tip>
+**Consistent naming:** Use a clear prefix pattern for your test files (e.g., `testcase_`, `input_`, `test_`) to make them easy to reference.
+</Tip>
+
+<Tip>
+**Organize by category:** Group test cases into subdirectories or use different prefixes:
+- `test_cases/small_` for small inputs
+- `test_cases/large_` for large inputs  
+- `test_cases/edge_` for edge cases
+</Tip>
+
+<Tip>
+**Generate reference outputs early:** Use your brute-force solution to create correct output files, then compare your optimized solution against them.
+</Tip>
+
+<Warning>
+**Output files overwrite:** If you run with `--save-out` multiple times, existing `.out.txt` files will be overwritten without warning.
+</Warning>
+
+## Combining with Other Commands
+
+The `output` command works well with other QuickTest commands:
+
+1. **Use `cmp` to find issues:**
+   ```bash
+   qt cmp -t main.cpp -c correct.cpp -g gen.cpp --save-bad
+   ```
+
+2. **Generate outputs for failed cases:**
+   ```bash
+   qt output -t main.cpp -p .qt/testcase_wa --save-out
+   ```
+
+3. **Manually inspect the differences:**
+   ```bash
+   diff .qt/testcase_wa_01.expected.txt .qt/testcase_wa_01.out.txt
+   ```
+
+## See Also
+
+- [cmp](/commands/cmp) - Compare solutions with correctness checking
+- [check](/commands/check) - Use custom checkers for validation
+- [stress](/commands/stress) - Performance testing without output validation

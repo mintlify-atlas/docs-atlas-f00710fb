@@ -1,0 +1,232 @@
+---
+title: Go Support
+description: Complete reference for Go language support in Quick Test CLI
+---
+
+Quick Test CLI provides full support for Go with automatic compilation and execution of your competitive programming solutions.
+
+## File Extension
+
+Go files must use the `.go` extension:
+
+```go
+main.go
+correct.go
+gen.go
+```
+
+## Compilation
+
+Go files are compiled using the `go build` command with a special workflow:
+
+```bash
+cp main.go ~/.quicktest/go_mod/main.go && \
+go build -buildmode=exe -o ./.qt/main ~/.quicktest/go_mod/main.go
+```
+
+### Compilation Process
+
+1. **Copy source file** to `~/.quicktest/go_mod/main.go`
+2. **Build executable** using `go build`
+3. **Output binary** to `.qt/main`
+
+<Info>
+Quick Test CLI uses a dedicated directory at `~/.quicktest/go_mod/` to manage Go modules and dependencies.
+</Info>
+
+## Execution
+
+After compilation, the binary is executed with:
+
+```bash
+./.qt/main
+```
+
+## Example Code
+
+Here's a typical Go solution for competitive programming:
+
+```go
+package main
+
+import (
+	"bufio"
+	"fmt"
+	"os"
+)
+
+var r = bufio.NewReader(os.Stdin)
+var w = bufio.NewWriter(os.Stdout)
+
+func solveOne() {
+    var n int
+	fmt.Fscan(r, &n)
+	values := make([]int, n)
+	for i := 0; i < n; i++ {
+		fmt.Fscan(r, &values[i])
+	}
+
+	best := 0
+    for i := 0; i < n; i++ {
+        sum := 0
+        for j := i; j < n; j++ {
+            sum += values[j]
+            best = max(best, sum)
+        }
+    }
+    fmt.Fprintln(w, best)
+}
+
+func min(a, b int) int {
+    if a < b {
+        return a
+    }
+    return b
+}
+
+func max(a, b int) int {
+    if a > b {
+        return a
+    }
+    return b
+}
+
+func main() {
+	defer w.Flush()
+	solveOne()
+}
+```
+
+## Usage with Quick Test
+
+### Compare Mode (cmp)
+
+Compare your solution against a brute-force correct solution:
+
+```bash
+quicktest cmp --target-file=main.go --correct-file=correct.go --gen-file=gen.go
+```
+
+### Stress Testing Mode
+
+Test your solution's performance:
+
+```bash
+quicktest stress --target-file=main.go --gen-file=gen.go --tout 1000 --tc 1000
+```
+
+### Checker Mode
+
+For problems with multiple valid answers:
+
+```bash
+quicktest check --target-file=main.go --checker-file=checker.go --gen-file=gen.go
+```
+
+## Requirements
+
+<Warning>
+You must have Go installed on your system to compile and run Go files.
+</Warning>
+
+Verify your installation:
+
+```bash
+go version
+```
+
+### Installing Go
+
+If you don't have Go installed, visit [go.dev/doc/install](https://go.dev/doc/install) for installation instructions.
+
+## Fast I/O in Go
+
+<Tip>
+For competitive programming, use buffered I/O for better performance with large inputs:
+</Tip>
+
+```go
+import (
+    "bufio"
+    "fmt"
+    "os"
+)
+
+var r = bufio.NewReader(os.Stdin)
+var w = bufio.NewWriter(os.Stdout)
+
+func main() {
+    defer w.Flush()
+    
+    // Use fmt.Fscan(r, ...) for input
+    var n int
+    fmt.Fscan(r, &n)
+    
+    // Use fmt.Fprintln(w, ...) for output
+    fmt.Fprintln(w, n)
+}
+```
+
+## Common Patterns
+
+### Reading Input
+
+```go
+// Single integer
+var n int
+fmt.Fscan(r, &n)
+
+// Multiple integers
+var a, b, c int
+fmt.Fscan(r, &a, &b, &c)
+
+// Array/Slice
+values := make([]int, n)
+for i := 0; i < n; i++ {
+    fmt.Fscan(r, &values[i])
+}
+```
+
+### Helper Functions
+
+Go doesn't have built-in min/max for integers, so define them:
+
+```go
+func min(a, b int) int {
+    if a < b {
+        return a
+    }
+    return b
+}
+
+func max(a, b int) int {
+    if a > b {
+        return a
+    }
+    return b
+}
+```
+
+## Package Structure
+
+<Note>
+All Go files for Quick Test CLI must be in the `main` package and have a `main()` function as the entry point.
+</Note>
+
+```go
+package main
+
+func main() {
+    // Your code here
+}
+```
+
+## Performance
+
+Go compiles to native machine code and provides excellent performance for competitive programming, comparable to C++ and Rust.
+
+## Platform Support
+
+- **Linux**: Full support
+- **Windows**: Full support
+- **macOS**: Full support

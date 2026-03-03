@@ -1,0 +1,250 @@
+---
+title: Kotlin Support
+description: Complete reference for Kotlin language support in Quick Test CLI
+---
+
+Quick Test CLI provides full support for Kotlin with automatic compilation and execution of your competitive programming solutions.
+
+## File Extension
+
+Kotlin files must use the `.kt` extension:
+
+```kotlin
+main.kt
+correct.kt
+gen.kt
+```
+
+## Compilation
+
+Kotlin files are compiled using `kotlinc` with the following command:
+
+```bash
+kotlinc main.kt -include-runtime -d .qt/main.jar
+```
+
+### Compilation Options
+
+- `-include-runtime` - Includes the Kotlin runtime library in the JAR file
+- `-d .qt/main.jar` - Specifies the output JAR file location
+
+<Info>
+The compiled output is a JAR file that includes the Kotlin runtime, making it standalone and executable.
+</Info>
+
+## Execution
+
+After compilation, the JAR is executed with:
+
+```bash
+java -jar .qt/main.jar
+```
+
+## Example Code
+
+Here's a typical Kotlin solution for competitive programming:
+
+```kotlin
+fun main() {
+    // Maximum Subarray Problem
+
+    val n = readLine()!!.toInt()
+    val a = readLine()!!.split(" ").map { it.toInt() }
+
+    var best = 0
+    
+    for (i in 0..n-1) {
+        var sum = 0
+        for (j in i..n-1) {
+            sum += a[j]
+            best = best.coerceAtLeast(sum)
+        }
+    }
+    println(best)
+}
+```
+
+## Usage with Quick Test
+
+### Compare Mode (cmp)
+
+Compare your solution against a brute-force correct solution:
+
+```bash
+quicktest cmp --target-file=main.kt --correct-file=correct.kt --gen-file=gen.kt
+```
+
+### Stress Testing Mode
+
+Test your solution's performance:
+
+```bash
+quicktest stress --target-file=main.kt --gen-file=gen.kt --tout 2000 --tc 1000
+```
+
+### Checker Mode
+
+For problems with multiple valid answers:
+
+```bash
+quicktest check --target-file=main.kt --checker-file=checker.kt --gen-file=gen.kt
+```
+
+## Requirements
+
+<Warning>
+You must have the Kotlin compiler (`kotlinc`) and Java Runtime Environment (JRE) installed on your system.
+</Warning>
+
+Verify your installation:
+
+```bash
+kotlinc -version
+java -version
+```
+
+### Installing Kotlin
+
+Kotlin can be installed via:
+- **SDKMAN**: `sdk install kotlin`
+- **Homebrew** (macOS): `brew install kotlin`
+- **Manual**: Download from [kotlinlang.org](https://kotlinlang.org/docs/command-line.html)
+
+## Input/Output
+
+### Reading Input
+
+```kotlin
+// Single integer
+val n = readLine()!!.toInt()
+
+// Multiple integers on one line
+val (a, b, c) = readLine()!!.split(" ").map { it.toInt() }
+
+// List of integers
+val values = readLine()!!.split(" ").map { it.toInt() }
+
+// Multiple lines
+val data = List(n) { readLine()!!.toInt() }
+```
+
+<Note>
+The `!!` operator asserts that `readLine()` is not null. This is safe for competitive programming where input format is guaranteed.
+</Note>
+
+### Writing Output
+
+```kotlin
+// Single value
+println(result)
+
+// Multiple values
+println("$a $b $c")
+
+// Formatted
+println("%.2f".format(pi))
+```
+
+## Common Functions
+
+### Min/Max
+
+```kotlin
+val maxValue = maxOf(a, b)
+val minValue = minOf(a, b)
+
+// Or using coerceAtLeast/coerceAtMost
+val max = a.coerceAtLeast(b)
+val min = a.coerceAtMost(b)
+```
+
+### Collections
+
+```kotlin
+// List
+val list = listOf(1, 2, 3)
+val mutableList = mutableListOf(1, 2, 3)
+
+// Array
+val arr = Array(n) { 0 }
+val intArr = IntArray(n) { 0 }
+
+// Map operations
+val doubled = list.map { it * 2 }
+val filtered = list.filter { it > 0 }
+val sum = list.sum()
+```
+
+## Kotlin Features for Competitive Programming
+
+### Range Iterations
+
+```kotlin
+// Inclusive range
+for (i in 0..n-1) { }
+for (i in 0 until n) { }  // Exclusive end
+
+// Reverse
+for (i in n-1 downTo 0) { }
+
+// With step
+for (i in 0..n step 2) { }
+```
+
+### Pair and Triple
+
+```kotlin
+val pair = Pair(1, 2)
+val (x, y) = pair
+
+val triple = Triple(1, 2, 3)
+val (a, b, c) = triple
+```
+
+### Lambda Functions
+
+```kotlin
+val max = { a: Int, b: Int -> if (a > b) a else b }
+println(max(5, 3))
+```
+
+<Tip>
+Kotlin's concise syntax and powerful standard library functions can significantly reduce code length in competitive programming.
+</Tip>
+
+## Performance Considerations
+
+<Note>
+Kotlin compiles to JVM bytecode like Java, so performance is generally comparable. However, compilation time can be slower than Java.
+</Note>
+
+### Fast I/O
+
+For large inputs, consider using BufferedReader:
+
+```kotlin
+import java.io.BufferedReader
+import java.io.InputStreamReader
+
+fun main() {
+    val reader = BufferedReader(InputStreamReader(System.`in`))
+    val n = reader.readLine().toInt()
+    val values = reader.readLine().split(" ").map { it.toInt() }
+    // Your code here
+}
+```
+
+## Comparison with Java
+
+Kotlin offers several advantages over Java for competitive programming:
+- More concise syntax
+- Null safety with `!!` and `?` operators
+- Extension functions and operators
+- Built-in collection operations (map, filter, etc.)
+- Type inference
+
+## Platform Support
+
+- **Linux**: Full support
+- **Windows**: Full support
+- **macOS**: Full support

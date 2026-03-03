@@ -1,0 +1,377 @@
+---
+title: "stress"
+description: "Detect Time Limit Exceeded (TLE) and performance issues in your solution"
+---
+
+## Overview
+
+The `stress` command verifies that your solution executes within the specified time and memory limits across multiple randomly generated test cases. Unlike `cmp`, it doesn't verify correctness against another solution—it only checks performance.
+
+<Info>
+Use `stress` when you're confident your solution is correct but want to ensure it runs fast enough for contest constraints.
+</Info>
+
+## Basic Usage
+
+```bash
+quicktest stress --target-file=main.cpp --gen-file=gen.cpp
+```
+
+Or using the shorter alias:
+
+```bash
+qt stress -t main.cpp -g gen.cpp
+```
+
+## Required Parameters
+
+<ParamField path="target-file" type="string" required>
+  Your solution file to stress test. Can be any supported language (C++, Java, Python, Rust, Go, C, Kotlin).
+  
+  **Short form:** `-t`
+  
+  ```bash
+  --target-file=main.cpp
+  -t main.cpp
+  ```
+</ParamField>
+
+<ParamField path="gen-file" type="string" required>
+  Random test case generator file that produces input data.
+  
+  **Short form:** `-g`
+  
+  **Default:** `""` (empty - can use `--prefix` instead)
+  
+  <Note>
+  The generator and prefix options are mutually exclusive. Use either `--gen-file` for random generation or `--prefix` to run existing test cases.
+  </Note>
+  
+  ```bash
+  --gen-file=gen.cpp
+  -g gen.cpp
+  ```
+</ParamField>
+
+## Optional Parameters
+
+<ParamField path="test-cases" type="number" default="1000">
+  Number of test cases to generate and run.
+  
+  **Alias:** `--tc`
+  
+  ```bash
+  --test-cases=500
+  --tc 500
+  ```
+</ParamField>
+
+<ParamField path="timeout" type="number" default="2000">
+  Maximum execution time per test case in milliseconds.
+  
+  **Alias:** `--tout`
+  
+  ```bash
+  --timeout=1000
+  --tout 1000
+  ```
+</ParamField>
+
+<ParamField path="memory-limit" type="number" default="1000000000">
+  Memory limit in bytes (default is 1GB).
+  
+  **Alias:** `--ml`
+  
+  ```bash
+  --memory-limit=512000000
+  --ml 512000000
+  ```
+</ParamField>
+
+<ParamField path="prefix" type="string" default="">
+  Path prefix for existing test case files. Use this to stress test against pre-existing test cases.
+  
+  **Short form:** `-p`
+  
+  **Conflicts with:** `--gen-file`
+  
+  ```bash
+  --prefix=test_cases/testcase_ac
+  -p test_cases/testcase_ac
+  ```
+</ParamField>
+
+## Control Flags
+
+<ParamField path="break-bad" type="boolean" default="false">
+  Stop execution immediately when a TLE (Time Limit Exceeded) or RTE (Runtime Error) occurs.
+  
+  **Aliases:** `--break`, `-b`
+  
+  ```bash
+  --break-bad
+  --break
+  -b
+  ```
+</ParamField>
+
+## Save Options
+
+<Warning>
+The `--save-all` and `--save-bad` flags are mutually exclusive.
+</Warning>
+
+<ParamField path="save-bad" type="boolean" default="false">
+  Save only test cases that fail (TLE, RTE, MLE states).
+  
+  ```bash
+  --save-bad
+  ```
+</ParamField>
+
+<ParamField path="save-all" type="boolean" default="false">
+  Save all test cases regardless of their result.
+  
+  ```bash
+  --save-all
+  ```
+</ParamField>
+
+## Run Filters
+
+Use these flags to run specific subsets of previously saved test cases:
+
+<ParamField path="run-all" type="boolean" default="false">
+  Run all saved test cases.
+</ParamField>
+
+<ParamField path="run-ac" type="boolean" default="false">
+  Run only test cases that previously passed (Accepted status).
+</ParamField>
+
+<ParamField path="run-wa" type="boolean" default="false">
+  Run only test cases that previously failed with Wrong Answer.
+</ParamField>
+
+<ParamField path="run-tle" type="boolean" default="false">
+  Run only test cases that previously exceeded time limit.
+</ParamField>
+
+<ParamField path="run-mle" type="boolean" default="false">
+  Run only test cases that previously exceeded memory limit.
+</ParamField>
+
+<ParamField path="run-rte" type="boolean" default="false">
+  Run only test cases that previously had runtime errors.
+</ParamField>
+
+## Examples
+
+### Basic Stress Test
+
+<CodeGroup>
+```bash C++
+qt stress -t main.cpp -g gen.cpp --tc 15 --tout 1000
+```
+
+```bash Python
+qt stress -t main.py -g gen.py --tc 15 --tout 1000
+```
+
+```bash Rust
+qt stress -t main.rs -g gen.rs --tc 50 --tout 2000
+```
+</CodeGroup>
+
+### Detect TLE Cases
+
+<Steps>
+  <Step title="Run stress test with save-bad">
+    Find test cases that exceed time limits:
+    
+    ```bash
+    qt stress -t main.cpp -g gen.cpp --tc 100 --tout 1000 --save-bad
+    ```
+  </Step>
+  
+  <Step title="Analyze TLE cases">
+    Re-run only the TLE cases to investigate:
+    
+    ```bash
+    qt stress -t main.cpp -g gen.cpp --run-tle
+    ```
+  </Step>
+  
+  <Step title="Verify optimization">
+    After optimizing, test against the previously failing cases:
+    
+    ```bash
+    qt stress -t main.cpp -g gen.cpp --run-tle --break-bad
+    ```
+  </Step>
+</Steps>
+
+### Strict Time Constraints
+
+Test with strict competitive programming time limits (1 second):
+
+```bash
+qt stress -t main.cpp -g gen.cpp --tc 1000 --tout 1000 --break-bad
+```
+
+### Memory-Intensive Problems
+
+Set a custom memory limit (256MB):
+
+```bash
+qt stress -t main.cpp -g gen.cpp --tc 500 --ml 268435456
+```
+
+### Using Existing Test Cases
+
+Run stress tests against pre-generated test files:
+
+```bash
+qt stress -t main.cpp -p test_cases/testcase_ac --tc 10
+```
+
+<Tip>
+When using `--prefix`, QuickTest looks for files named like `testcase_ac_01.txt`, `testcase_ac_02.txt`, etc.
+</Tip>
+
+### Complete Example with Generator
+
+Here's a complete stress testing scenario:
+
+<CodeGroup>
+```cpp main.cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    int n; cin >> n;
+    vector<int> values(n);
+    for(int &a: values)
+        cin >> a;
+    
+    // O(n) solution
+    int best = 0, sum = 0;
+    for (int i = 0; i < n; i++) {
+        sum = max(values[i], sum + values[i]);
+        best = max(best, sum);
+    }
+    cout << best << "\n";
+    return 0;
+}
+```
+
+```cpp gen.cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+int main(int argc, char* argv[]) {
+    int seed = stoi(string(argv[1]));
+    srand(seed);
+
+    // Generate large test cases to stress the solution
+    const int N = int(2e5); // 200,000 elements
+    const int Ai = int(1e9);
+
+    int n = rand() % N + 1;
+    cout << n << "\n";
+
+    default_random_engine generator;
+    uniform_int_distribution<int> distribution(-Ai, Ai);
+
+    for(int i = 0; i < n; i++) {
+        if(i > 0) cout << " ";
+        cout << distribution(generator);
+    }
+    return 0;
+}
+```
+</CodeGroup>
+
+Run the stress test:
+
+```bash
+qt stress -t main.cpp -g gen.cpp --tc 50 --tout 1000 --save-bad
+```
+
+### Comprehensive Testing Session
+
+Save all test cases for later analysis:
+
+```bash
+qt stress -t main.cpp -g gen.cpp --tc 1000 --tout 2000 --save-all
+```
+
+Then run specific subsets:
+
+```bash
+# Check all previously accepted cases still pass
+qt stress -t main.cpp -g gen.cpp --run-ac
+
+# Re-test any TLE cases
+qt stress -t main.cpp -g gen.cpp --run-tle
+
+# Run everything again
+qt stress -t main.cpp -g gen.cpp --run-all
+```
+
+## Understanding Test Results
+
+QuickTest displays real-time results with status indicators:
+
+- **AC** - Accepted (passed within time/memory limits)
+- **TLE** - Time Limit Exceeded
+- **MLE** - Memory Limit Exceeded
+- **RTE** - Runtime Error
+
+<Note>
+Since `stress` doesn't compare outputs, you won't see **WA** (Wrong Answer) status. Use the [cmp](/commands/cmp) command if you need correctness verification.
+</Note>
+
+## When to Use Stress
+
+<CardGroup cols={2}>
+  <Card title="Performance Testing" icon="gauge-high">
+    Verify your solution meets time constraints for large inputs
+  </Card>
+  
+  <Card title="Optimization Validation" icon="rocket">
+    Confirm optimizations actually improve runtime
+  </Card>
+  
+  <Card title="Memory Profiling" icon="memory">
+    Test memory-intensive solutions against limits
+  </Card>
+  
+  <Card title="Regression Testing" icon="arrows-rotate">
+    Ensure code changes don't introduce performance issues
+  </Card>
+</CardGroup>
+
+## Tips
+
+<Tip>
+**Generate realistic test sizes:** Configure your generator to create test cases close to the problem's maximum constraints.
+</Tip>
+
+<Tip>
+**Use --break-bad for quick feedback:** During optimization, stop at the first TLE to save time.
+</Tip>
+
+<Tip>
+**Compare before and after:** Save all test cases before optimizing, then run the same cases after to measure improvement.
+</Tip>
+
+<Warning>
+**Don't ignore AC with close times:** If your solution passes but uses 90%+ of the time limit, it may TLE on different test data or slower systems.
+</Warning>
+
+## See Also
+
+- [cmp](/commands/cmp) - Compare against a correct solution
+- [check](/commands/check) - Use custom checker for validation
+- [output](/commands/output) - Generate output files from test cases

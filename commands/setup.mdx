@@ -1,0 +1,368 @@
+---
+title: "setup"
+description: "Configure QuickTest settings and compilation commands"
+---
+
+## Overview
+
+The `setup` command allows you to customize QuickTest's behavior, including compilation commands, execution settings, and language-specific configurations.
+
+<Info>
+QuickTest stores configuration in `~/.quicktest/` and comes with sensible defaults for all supported languages.
+</Info>
+
+## Basic Usage
+
+```bash
+quicktest setup <subcommand>
+```
+
+Or using the shorter alias:
+
+```bash
+qt setup <subcommand>
+```
+
+## Subcommands
+
+### config
+
+Modify specific configuration settings.
+
+```bash
+qt setup config --label=<config-path> --value=<new-value>
+```
+
+<ParamField path="label" type="string" required>
+  The configuration label (path) to modify.
+  
+  **Short form:** `-l`
+  
+  ```bash
+  --label=cpp.compile
+  -l cpp.compile
+  ```
+</ParamField>
+
+<ParamField path="value" type="string" required>
+  The new value for the specified configuration label.
+  
+  **Short form:** `-v`
+  
+  ```bash
+  --value="g++ -std=c++20 -O2 -Wall"
+  -v "g++ -std=c++20 -O2 -Wall"
+  ```
+</ParamField>
+
+### reset
+
+Reset all configurations to default values.
+
+```bash
+qt setup reset
+```
+
+<Warning>
+This will overwrite all custom configurations. Use with caution.
+</Warning>
+
+## Examples
+
+### View Current Configuration
+
+To see available configuration options and current values:
+
+```bash
+qt setup config --label=help --value=show
+```
+
+<Note>
+The actual implementation may vary. Check `qt setup --help` for the exact command to view configurations.
+</Note>
+
+### Customize C++ Compilation
+
+Change the C++ compiler flags:
+
+```bash
+qt setup config --label=cpp.compile --value="g++ -std=c++20 -O2 -Wall -Wextra -o .qt/main"
+```
+
+### Update C++ Standard
+
+Use C++20 instead of C++17:
+
+```bash
+qt setup config -l cpp.standard -v "c++20"
+```
+
+### Configure Python Interpreter
+
+Use a specific Python version:
+
+```bash
+qt setup config --label=python.interpreter --value="python3.11"
+```
+
+### Customize Java Compilation
+
+```bash
+qt setup config --label=java.compile --value="javac -d .qt/ -Xlint:all"
+```
+
+### Reset to Defaults
+
+If you've made changes and want to revert:
+
+```bash
+qt setup reset
+```
+
+## Default Compilation Commands
+
+QuickTest uses these default compilation and execution commands:
+
+### C++
+
+<CodeGroup>
+```bash Compilation
+g++ -std=c++17 -Wall -DONLINE_JUDGE=1 -o .qt/main main.cpp
+```
+
+```bash Execution
+./.qt/main
+```
+</CodeGroup>
+
+### Java
+
+<CodeGroup>
+```bash Compilation
+javac -d .qt/ Main.java
+```
+
+```bash Execution
+java -cp .qt/ Main
+```
+</CodeGroup>
+
+### Python
+
+<CodeGroup>
+```bash Execution
+python3 main.py
+```
+</CodeGroup>
+
+<Note>
+Python doesn't require compilation.
+</Note>
+
+### Rust
+
+<CodeGroup>
+```bash Compilation
+cp main.rs ~/.quicktest/rust/src/main.rs && \
+cargo build --release --quiet --manifest-path ~/.quicktest/rust/Cargo.toml && \
+cp ~/.quicktest/rust/target/release/rust .qt/main
+```
+
+```bash Execution
+./.qt/main
+```
+</CodeGroup>
+
+### Go
+
+<CodeGroup>
+```bash Compilation
+cp main.go ~/.quicktest/go_mod/main.go && \
+go build -buildmode=exe -o ./.qt/main ~/.quicktest/go_mod/main.go
+```
+
+```bash Execution
+./.qt/main
+```
+</CodeGroup>
+
+### C (GNU C)
+
+<CodeGroup>
+```bash Compilation
+gcc -std=gnu11 -lm main.c -o .qt/main
+```
+
+```bash Execution
+./.qt/main
+```
+</CodeGroup>
+
+### Kotlin
+
+<CodeGroup>
+```bash Compilation
+kotlinc main.kt -include-runtime -d .qt/main.jar
+```
+
+```bash Execution
+java -jar .qt/main.jar
+```
+</CodeGroup>
+
+## Configuration Labels Reference
+
+<Note>
+The exact configuration structure depends on QuickTest's implementation. The following is based on common patterns. Run `qt setup config --help` or check the source code for the complete list.
+</Note>
+
+Common configuration labels:
+
+- `cpp.compile` - C++ compilation command
+- `cpp.execute` - C++ execution command
+- `cpp.standard` - C++ standard version
+- `java.compile` - Java compilation command
+- `java.execute` - Java execution command
+- `python.interpreter` - Python interpreter path
+- `rust.compile` - Rust compilation command
+- `go.compile` - Go compilation command
+- `kotlin.compile` - Kotlin compilation command
+
+## Common Configuration Tasks
+
+### Enable Debug Symbols
+
+Add debugging information to compiled binaries:
+
+```bash
+qt setup config -l cpp.compile -v "g++ -std=c++17 -g -Wall -o .qt/main"
+```
+
+### Optimize for Speed
+
+Maximize optimization for competitive programming:
+
+```bash
+qt setup config -l cpp.compile -v "g++ -std=c++17 -O3 -march=native -Wall -o .qt/main"
+```
+
+### Add Sanitizers
+
+Detect memory errors and undefined behavior:
+
+```bash
+qt setup config -l cpp.compile -v "g++ -std=c++17 -fsanitize=address,undefined -Wall -o .qt/main"
+```
+
+### Use Clang Instead of GCC
+
+```bash
+qt setup config -l cpp.compile -v "clang++ -std=c++17 -Wall -o .qt/main"
+```
+
+### Configure for Specific Contest Platform
+
+Match Codeforces settings:
+
+```bash
+qt setup config -l cpp.compile -v "g++ -std=gnu++17 -O2 -Wall -Wextra -o .qt/main"
+```
+
+## Tips
+
+<Tip>
+**Keep a backup:** Before making significant configuration changes, note down your current settings in case you need to revert.
+</Tip>
+
+<Tip>
+**Platform-specific settings:** Different competitive programming platforms use different compiler flags. Configure QuickTest to match your target platform.
+</Tip>
+
+<Tip>
+**Test after changes:** After modifying compilation commands, run a simple test to ensure everything still works:
+```bash
+qt stress -t test.cpp -g gen.cpp --tc 10
+```
+</Tip>
+
+<Warning>
+**Quote complex values:** When setting values with spaces or special characters, use quotes:
+```bash
+qt setup config -l cpp.compile -v "g++ -std=c++17 -O2 -Wall -o .qt/main"
+```
+</Warning>
+
+## Configuration File Location
+
+QuickTest stores configuration files in:
+
+```
+~/.quicktest/
+```
+
+This directory contains:
+- Language-specific templates
+- Compilation settings
+- Runtime configurations
+
+<Note>
+You can manually edit these configuration files, but using `qt setup config` is recommended to ensure correct formatting.
+</Note>
+
+## Troubleshooting
+
+### Configuration Not Applied
+
+If your configuration changes don't seem to take effect:
+
+1. Verify the label is correct:
+   ```bash
+   qt setup config --label=cpp.compile --value="<your-command>"
+   ```
+
+2. Check for typos in the value
+
+3. Try resetting and reconfiguring:
+   ```bash
+   qt setup reset
+   qt setup config -l cpp.compile -v "<your-command>"
+   ```
+
+### Compilation Errors After Configuration
+
+If compilation breaks after changing settings:
+
+1. Reset to defaults:
+   ```bash
+   qt setup reset
+   ```
+
+2. Test with a simple program
+
+3. Gradually re-apply your custom settings
+
+## Platform-Specific Examples
+
+### Codeforces
+
+```bash
+qt setup config -l cpp.compile -v "g++ -std=gnu++17 -O2 -o .qt/main"
+```
+
+### AtCoder
+
+```bash
+qt setup config -l cpp.compile -v "g++ -std=gnu++20 -O2 -DONLINE_JUDGE -DATCODER -o .qt/main"
+```
+
+### Google Code Jam
+
+```bash
+qt setup config -l cpp.compile -v "g++ -std=c++17 -O2 -o .qt/main"
+```
+
+## See Also
+
+- [cmp](/commands/cmp) - Compare solutions
+- [stress](/commands/stress) - Performance testing
+- [check](/commands/check) - Custom validation

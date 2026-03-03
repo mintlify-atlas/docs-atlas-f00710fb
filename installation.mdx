@@ -1,0 +1,218 @@
+---
+title: Installation
+description: Install Quick Test CLI on Linux, Windows, or macOS
+---
+
+Quick Test CLI is distributed as a single binary executable with no external dependencies. Choose your installation method based on your operating system and preferences.
+
+## Quick installation
+
+<Tabs>
+  <Tab title="Linux">
+    Install using the automated shell script:
+
+    ```bash
+    curl -fsSL https://luchobazz.github.io/quicktest/install/install.sh | sh
+    ```
+
+    After installation, reload your shell configuration:
+
+    ```bash
+    source ~/.bashrc
+    # Or if you use zsh
+    source ~/.zshrc
+    ```
+
+    <Note>
+      The installer requires `unzip` to be installed. See [Known Issues](#unzip-is-required) if you encounter errors.
+    </Note>
+  </Tab>
+  
+  <Tab title="Windows">
+    Install using PowerShell:
+
+    ```powershell
+    iwr https://luchobazz.github.io/quicktest/install/install.ps1 -useb | iex
+    ```
+
+    The installer will download the binary and add it to your PATH automatically.
+
+    <Warning>
+      You may need to restart your terminal or open a new PowerShell window for the PATH changes to take effect.
+    </Warning>
+  </Tab>
+  
+  <Tab title="macOS">
+    Install using the shell script with a specific version:
+
+    ```bash
+    curl -fsSL https://luchobazz.github.io/quicktest/install/install.sh | v=1.0.10 sh
+    ```
+
+    After installation, reload your shell configuration:
+
+    ```bash
+    source ~/.zshrc
+    # Or if you use bash
+    source ~/.bashrc
+    ```
+
+    <Info>
+      macOS support is currently unverified. While the CLI has been successfully tested on Linux and Windows, macOS users should proceed with caution and report any issues on [GitHub](https://github.com/LuchoBazz/quicktest/issues).
+    </Info>
+  </Tab>
+</Tabs>
+
+## Install with Cargo
+
+If you have Rust and Cargo already installed on your system, you can install Quick Test CLI directly from crates.io:
+
+```bash
+cargo install quicktest
+```
+
+This method works on all platforms (Linux, Windows, and macOS).
+
+### Install Rust and Quick Test CLI together
+
+If you don't have Rust installed, you can install both Rust and Quick Test CLI with a single command:
+
+<CodeGroup>
+```bash Linux/macOS
+curl https://sh.rustup.rs -sSf | sh && cargo install quicktest
+```
+
+```powershell Windows
+# First install Rust from https://rustup.rs/
+# Then run:
+cargo install quicktest
+```
+</CodeGroup>
+
+## Verify installation
+
+After installation, verify that Quick Test CLI is properly installed:
+
+```bash
+quicktest --version
+```
+
+You can also use the shorter alias:
+
+```bash
+qt --version
+```
+
+Both commands should display the installed version number.
+
+## Updating
+
+To update Quick Test CLI to the latest version:
+
+<Tabs>
+  <Tab title="Script installation">
+    Re-run the installation script for your platform. It will automatically download and install the latest version:
+
+    ```bash Linux/macOS
+    curl -fsSL https://luchobazz.github.io/quicktest/install/install.sh | sh
+    ```
+
+    ```powershell Windows
+    iwr https://luchobazz.github.io/quicktest/install/install.ps1 -useb | iex
+    ```
+  </Tab>
+  
+  <Tab title="Cargo installation">
+    Use Cargo to update to the latest version:
+
+    ```bash
+    cargo install quicktest --force
+    ```
+
+    The `--force` flag will overwrite the existing installation.
+  </Tab>
+</Tabs>
+
+## Known issues
+
+### unzip is required
+
+The shell installer requires the `unzip` utility to extract the downloaded archive.
+
+**Error message:**
+
+```bash
+$ curl -fsSL https://luchobazz.github.io/quicktest/install/install.sh | sh
+Error: unzip is required to install Quick Test CLI
+```
+
+**Solution:**
+
+Install `unzip` using your package manager:
+
+<CodeGroup>
+```bash Ubuntu/Debian
+sudo apt-get install unzip -y
+```
+
+```bash Fedora/RHEL
+sudo dnf install unzip
+```
+
+```bash Arch Linux
+sudo pacman -S unzip
+```
+
+```bash macOS
+brew install unzip
+```
+</CodeGroup>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found after installation" icon="terminal">
+    If you receive a "command not found" error after installation:
+
+    1. Close and reopen your terminal
+    2. Reload your shell configuration:
+       ```bash
+       source ~/.bashrc  # or ~/.zshrc for zsh users
+       ```
+    3. Verify the binary is in your PATH:
+       ```bash
+       which quicktest
+       ```
+    
+    If the issue persists, the installation directory may not be in your PATH. Add it manually to your shell configuration file.
+  </Accordion>
+  
+  <Accordion title="Permission denied errors" icon="lock">
+    On Linux/macOS, if you encounter permission errors:
+
+    1. Ensure the binary has execute permissions:
+       ```bash
+       chmod +x $(which quicktest)
+       ```
+    2. If installing to a system directory, you may need sudo privileges
+  </Accordion>
+  
+  <Accordion title="Cargo build failures" icon="wrench">
+    If `cargo install quicktest` fails:
+
+    1. Update Rust to the latest version:
+       ```bash
+       rustup update
+       ```
+    2. Ensure you have the necessary build tools installed:
+       - Linux: `build-essential` package
+       - Windows: Visual Studio Build Tools or MinGW
+       - macOS: Xcode Command Line Tools
+  </Accordion>
+</AccordionGroup>
+
+## Next steps
+
+<Card title="Quickstart guide" icon="rocket" href="/quickstart">
+  Learn how to run your first stress test with Quick Test CLI
+</Card>

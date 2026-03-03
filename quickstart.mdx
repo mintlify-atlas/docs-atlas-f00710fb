@@ -1,80 +1,334 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: Quickstart
+description: Run your first stress test with Quick Test CLI in under 5 minutes
 ---
 
-## Get started in three steps
+This guide walks you through running your first stress test using Quick Test CLI. You'll learn the basic workflow and test modes.
 
-Get your documentation site running locally and make your first customization.
+<Note>
+  Make sure you have [installed Quick Test CLI](/installation) before proceeding.
+</Note>
 
-### Step 1: Set up your local environment
+## Your first stress test
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
+Let's run a stress test to validate a solution by comparing it against a brute-force approach. This is the most common use case in competitive programming.
+
+<Steps>
+  <Step title="Create your solution file">
+    Create a file named `main.cpp` with your optimized solution. For this example, we'll solve a simple problem: find the sum of two numbers.
+
+    ```cpp main.cpp
+    #include <iostream>
+    using namespace std;
+
+    int main() {
+        int a, b;
+        cin >> a >> b;
+        cout << a + b << endl;
+        return 0;
+    }
+    ```
+  </Step>
+
+  <Step title="Create a correct solution">
+    Create a file named `correct.cpp` with a brute-force solution that you're confident is correct. This can be slower but must always produce the right answer.
+
+    ```cpp correct.cpp
+    #include <iostream>
+    using namespace std;
+
+    int main() {
+        int a, b;
+        cin >> a >> b;
+        // Same simple solution for this example
+        cout << a + b << endl;
+        return 0;
+    }
+    ```
+
+    <Info>
+      For more complex problems, your brute-force solution might use nested loops or simpler algorithms, while your main solution uses optimizations.
+    </Info>
+  </Step>
+
+  <Step title="Create a test generator">
+    Create a file named `gen.cpp` that generates random test cases:
+
+    ```cpp gen.cpp
+    #include <iostream>
+    #include <cstdlib>
+    #include <ctime>
+    using namespace std;
+
+    int main() {
+        srand(time(0));
+        int a = rand() % 1000;
+        int b = rand() % 1000;
+        cout << a << " " << b << endl;
+        return 0;
+    }
+    ```
+
+    <Tip>
+      The generator should output test cases to `stdout`. Quick Test CLI will feed this output to both your solution and the correct solution.
+    </Tip>
+  </Step>
+
+  <Step title="Run the stress test">
+    Now run Quick Test CLI to compare your solutions:
+
+    ```bash
+    quicktest cmp --target-file=main.cpp --correct-file=correct.cpp --gen-file=gen.cpp
+    ```
+
+    Or use the shorter alias and options:
+
+    ```bash
+    qt cmp -t main.cpp -c correct.cpp -g gen.cpp --tc 100 --tout 1000
+    ```
+
+    This command will:
+    - Compile all three files
+    - Run 100 test cases (`--tc 100`)
+    - Set a timeout of 1000ms per test (`--tout 1000`)
+    - Compare outputs from `main.cpp` and `correct.cpp`
+  </Step>
+
+  <Step title="Review the results">
+    Quick Test CLI will display results for each test case:
+
+    - ✅ **AC** (Accepted): Output matches
+    - ❌ **WA** (Wrong Answer): Output differs
+    - ⏱️ **TLE** (Time Limit Exceeded): Execution timeout
+    - 💥 **RTE** (Runtime Error): Program crashed
+
+    If a test case fails, the tool will show you the input and both outputs so you can debug.
+  </Step>
+</Steps>
+
+## Understanding test modes
+
+Quick Test CLI supports four different testing modes. Here's when to use each:
+
+<CardGroup cols={2}>
+  <Card title="cmp" icon="code-compare" href="/commands/cmp">
+    **Compare two solutions**
     
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
+    Use when you have a correct but slow solution and want to verify your optimized version.
     
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
+    ```bash
+    qt cmp -t main.cpp -c correct.cpp -g gen.cpp
+    ```
+  </Card>
 
-### Step 2: Deploy your changes
-
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
+  <Card title="stress" icon="bolt" href="/commands/stress">
+    **Stress test performance**
     
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+    Use when you only want to verify your solution runs within time limits (no comparison).
+    
+    ```bash
+    qt stress -t main.cpp -g gen.cpp --tout 1000
+    ```
+  </Card>
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+  <Card title="check" icon="check-double" href="/commands/check">
+    **Custom validation**
+    
+    Use for problems with multiple valid answers. Requires a checker program that validates output.
+    
+    ```bash
+    qt check -t main.cpp -c checker.cpp -g gen.cpp
+    ```
+  </Card>
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+  <Card title="output" icon="file-export" href="/commands/output">
+    **Batch processing**
+    
+    Run your solution on existing test files and save outputs.
+    
+    ```bash
+    qt output -t main.cpp -p testcase_prefix
+    ```
+  </Card>
+</CardGroup>
 
-### Step 3: Go live
+## Common options
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+All test modes support these commonly used options:
+
+| Option | Short | Default | Description |
+|--------|-------|---------|-------------|
+| `--test-cases` | `--tc` | 1000 | Number of test cases to generate |
+| `--timeout` | `--tout` | 2000 | Time limit per test in milliseconds |
+| `--memory-limit` | `--ml` | 1GB | Memory limit in bytes |
+| `--break-bad` | `--break` | false | Stop on first WA/TLE/RTE |
+| `--save-bad` | - | false | Save failing test cases to disk |
+| `--save-all` | - | false | Save all test cases to disk |
+
+### Examples with options
+
+<CodeGroup>
+```bash Run 500 tests with 1s timeout
+qt cmp -t main.cpp -c correct.cpp -g gen.cpp --tc 500 --tout 1000
+```
+
+```bash Stop on first failure
+qt cmp -t main.cpp -c correct.cpp -g gen.cpp --break-bad
+```
+
+```bash Save failing test cases
+qt cmp -t main.cpp -c correct.cpp -g gen.cpp --save-bad
+```
+
+```bash Run with memory limit
+qt cmp -t main.cpp -c correct.cpp -g gen.cpp --ml 536870912
+```
+</CodeGroup>
+
+## Multi-language support
+
+Quick Test CLI supports multiple programming languages. Simply use the appropriate file extension:
+
+<Tabs>
+  <Tab title="C++">
+    ```bash
+    qt cmp -t main.cpp -c correct.cpp -g gen.cpp
+    ```
+    
+    Compiles with: `g++ -std=c++17 -Wall -DONLINE_JUDGE=1 -o .qt/main main.cpp`
+  </Tab>
+
+  <Tab title="Python">
+    ```bash
+    qt cmp -t main.py -c correct.py -g gen.py
+    ```
+    
+    Runs with: `python3 main.py`
+  </Tab>
+
+  <Tab title="Java">
+    ```bash
+    qt cmp -t Main.java -c Correct.java -g Gen.java
+    ```
+    
+    Compiles with: `javac -d .qt/ Main.java`
+  </Tab>
+
+  <Tab title="Rust">
+    ```bash
+    qt cmp -t main.rs -c correct.rs -g gen.rs
+    ```
+    
+    Compiles with Cargo using release mode
+  </Tab>
+
+  <Tab title="Go">
+    ```bash
+    qt cmp -t main.go -c correct.go -g gen.go
+    ```
+    
+    Compiles with: `go build -o ./.qt/main main.go`
+  </Tab>
+</Tabs>
+
+See the [Supported Languages](/concepts/supported-languages) page for compilation details and language-specific configuration.
+
+## Working with saved test cases
+
+When you find a bug, you'll want to save failing test cases and re-run them after fixing your code.
+
+<Steps>
+  <Step title="Save failing test cases">
+    Run your stress test with the `--save-bad` flag:
+
+    ```bash
+    qt cmp -t main.cpp -c correct.cpp -g gen.cpp --save-bad
+    ```
+
+    Failing test cases will be saved in the `.qt/` directory.
+  </Step>
+
+  <Step title="Fix your solution">
+    Review the saved test cases and fix your code.
+  </Step>
+
+  <Step title="Re-run failing tests">
+    Use the `--run-wa` flag to only re-run previously failing tests:
+
+    ```bash
+    qt cmp -t main.cpp -c correct.cpp -g gen.cpp --run-wa
+    ```
+
+    You can also use:
+    - `--run-tle`: Re-run timeout cases
+    - `--run-rte`: Re-run runtime error cases
+    - `--run-ac`: Re-run accepted cases
+    - `--run-all`: Re-run all saved cases
+  </Step>
+</Steps>
+
+## Example workflow
+
+Here's a typical workflow for competitive programming:
+
+<Steps>
+  <Step title="Write a brute-force solution">
+    Start with a simple, obviously correct solution in `correct.cpp`.
+  </Step>
+
+  <Step title="Write your optimized solution">
+    Implement your faster algorithm in `main.cpp`.
+  </Step>
+
+  <Step title="Create a test generator">
+    Write `gen.cpp` to generate random test cases within problem constraints.
+  </Step>
+
+  <Step title="Run stress tests">
+    ```bash
+    qt cmp -t main.cpp -c correct.cpp -g gen.cpp --tc 1000 --save-bad --break
+    ```
+  </Step>
+
+  <Step title="Debug if needed">
+    If a test fails:
+    1. Check the failing test case in `.qt/` directory
+    2. Fix your solution
+    3. Re-run: `qt cmp -t main.cpp -c correct.cpp -g gen.cpp --run-wa`
+  </Step>
+
+  <Step title="Submit with confidence">
+    Once all 1000 tests pass, submit your solution!
+  </Step>
+</Steps>
 
 ## Next steps
 
-Now that you have your docs running, explore these key features:
+Now that you've run your first stress test, explore more features:
 
 <CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
+  <Card title="Compare mode" icon="code-compare" href="/commands/cmp">
+    Deep dive into comparison testing with all available options
+  </Card>
+  
+  <Card title="Stress mode" icon="bolt" href="/commands/stress">
+    Learn about performance stress testing without comparisons
+  </Card>
+  
+  <Card title="Check mode" icon="check-double" href="/commands/check">
+    Use custom checkers for problems with multiple valid answers
+  </Card>
+  
+  <Card title="Supported languages" icon="code" href="/concepts/supported-languages">
+    See compilation commands and configuration for all languages
+  </Card>
 </CardGroup>
 
-<Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
-</Note>
+## Getting help
+
+Need assistance?
+
+- View examples: `qt example --cmp`
+- Check all options: `qt cmp --help`
+- Report bugs: [GitHub Issues](https://github.com/LuchoBazz/quicktest/issues)
+- Read full documentation: Browse the sidebar for detailed guides

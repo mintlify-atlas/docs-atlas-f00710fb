@@ -1,0 +1,144 @@
+---
+title: Java Support
+description: Complete reference for Java language support in Quick Test CLI
+---
+
+Quick Test CLI provides full support for Java with automatic compilation and execution of your competitive programming solutions.
+
+## File Extension
+
+Java files must use the `.java` extension:
+
+```java
+Main.java
+Correct.java
+Gen.java
+```
+
+<Warning>
+The class name must match the filename. For example, `Main.java` must contain `public class Main`.
+</Warning>
+
+## Compilation
+
+Java files are compiled using `javac` with the following command:
+
+```bash
+javac -d .qt/ Main.java
+```
+
+### Compilation Options
+
+- `-d .qt/` - Specifies the output directory for compiled `.class` files
+
+All compiled classes are placed in the `.qt/` directory to keep your workspace clean.
+
+## Execution
+
+After compilation, the bytecode is executed with:
+
+```bash
+java -cp .qt/ Main
+```
+
+### Execution Options
+
+- `-cp .qt/` - Sets the classpath to the `.qt/` directory where compiled classes are located
+- `Main` - The name of the class containing the `main` method
+
+## Example Code
+
+Here's a typical Java solution for competitive programming:
+
+```java
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int n = sc.nextInt();
+        int[] values = new int[n];
+        for(int i = 0; i < n; ++i) {
+            values[i] = sc.nextInt();
+        }
+        int best = 0;
+        for (int i = 0; i < n; i++) {
+            int sum = 0;
+            for (int j = i; j < n; j++) {
+                sum += values[j];
+                best = Math.max(best, sum);
+            }
+        }
+        System.out.println(best);
+    }
+}
+```
+
+## Usage with Quick Test
+
+### Compare Mode (cmp)
+
+Compare your solution against a brute-force correct solution:
+
+```bash
+quicktest cmp --target-file=Main.java --correct-file=Correct.java --gen-file=Gen.java
+```
+
+### Stress Testing Mode
+
+Test your solution's performance:
+
+```bash
+quicktest stress --target-file=Main.java --gen-file=Gen.java --tout 2000 --tc 1000
+```
+
+### Checker Mode
+
+For problems with multiple valid answers:
+
+```bash
+quicktest check --target-file=Main.java --checker-file=Checker.java --gen-file=Gen.java
+```
+
+## Requirements
+
+<Warning>
+You must have the Java Development Kit (JDK) installed on your system to compile and run Java files.
+</Warning>
+
+Verify your installation:
+
+```bash
+javac -version
+java -version
+```
+
+## Naming Conventions
+
+<Info>
+For Quick Test CLI, the main solution file is typically named `Main.java` with the class `public class Main`.
+</Info>
+
+Other files follow similar conventions:
+- **Correct solution**: `Correct.java` with `public class Correct`
+- **Generator**: `Gen.java` with `public class Gen`
+- **Checker**: `Checker.java` with `public class Checker`
+
+## Common Imports
+
+For competitive programming in Java, you typically need:
+
+```java
+import java.util.*;
+import java.io.*;
+```
+
+<Tip>
+For faster I/O in competitive programming, consider using `BufferedReader` instead of `Scanner` for large inputs.
+</Tip>
+
+## Platform Support
+
+- **Linux**: Full support
+- **Windows**: Full support
+- **macOS**: Full support

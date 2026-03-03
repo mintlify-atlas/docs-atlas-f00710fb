@@ -1,0 +1,417 @@
+---
+title: "check"
+description: "Verify solutions with custom checker scripts for problems with multiple valid answers"
+---
+
+## Overview
+
+The `check` command validates your solution using a custom checker script instead of direct output comparison. This is essential for problems where multiple correct answers exist, making simple string comparison inadequate.
+
+<Info>
+Use `check` when a problem accepts multiple valid solutions (e.g., "find any valid pair", "output any permutation that satisfies", etc.)
+</Info>
+
+## Basic Usage
+
+```bash
+quicktest check --target-file=main.cpp --checker-file=checker.cpp --gen-file=gen.cpp
+```
+
+Or using the shorter alias:
+
+```bash
+qt check -t main.cpp -c checker.cpp -g gen.cpp
+```
+
+## Required Parameters
+
+<ParamField path="target-file" type="string" required>
+  Your solution file to validate. Can be any supported language (C++, Java, Python, Rust, Go, C, Kotlin).
+  
+  **Short form:** `-t`
+  
+  ```bash
+  --target-file=main.cpp
+  -t main.cpp
+  ```
+</ParamField>
+
+<ParamField path="checker-file" type="string" required>
+  The checker script that validates whether the solution's output is correct. This script receives the input and your solution's output, then outputs "YES" or "NO".
+  
+  **Short form:** `-c`
+  
+  ```bash
+  --checker-file=checker.cpp
+  -c checker.cpp
+  ```
+</ParamField>
+
+<ParamField path="gen-file" type="string" required>
+  Random test case generator file.
+  
+  **Short form:** `-g`
+  
+  **Default:** `""` (empty - can use `--prefix` instead)
+  
+  <Note>
+  The generator and prefix options are mutually exclusive. Use either `--gen-file` for random generation or `--prefix` to run existing test cases.
+  </Note>
+  
+  ```bash
+  --gen-file=gen.cpp
+  -g gen.cpp
+  ```
+</ParamField>
+
+## Optional Parameters
+
+<ParamField path="test-cases" type="number" default="1000">
+  Number of test cases to generate and run.
+  
+  **Alias:** `--tc`
+  
+  ```bash
+  --test-cases=500
+  --tc 500
+  ```
+</ParamField>
+
+<ParamField path="timeout" type="number" default="2000">
+  Maximum execution time per test case in milliseconds.
+  
+  **Alias:** `--tout`
+  
+  ```bash
+  --timeout=1000
+  --tout 1000
+  ```
+</ParamField>
+
+<ParamField path="memory-limit" type="number" default="1000000000">
+  Memory limit in bytes (default is 1GB).
+  
+  **Alias:** `--ml`
+  
+  ```bash
+  --memory-limit=512000000
+  --ml 512000000
+  ```
+</ParamField>
+
+<ParamField path="prefix" type="string" default="">
+  Path prefix for existing test case files.
+  
+  **Short form:** `-p`
+  
+  **Conflicts with:** `--gen-file`
+  
+  ```bash
+  --prefix=test_cases/testcase
+  -p test_cases/testcase
+  ```
+</ParamField>
+
+## Control Flags
+
+<ParamField path="break-bad" type="boolean" default="false">
+  Stop execution immediately when a WA (Wrong Answer), TLE (Time Limit Exceeded), or RTE (Runtime Error) occurs.
+  
+  **Aliases:** `--break`, `-b`
+  
+  <Note>
+  Note the underscore in the code: `break_bad` (line 198 in opt.rs)
+  </Note>
+  
+  ```bash
+  --break-bad
+  --break
+  -b
+  ```
+</ParamField>
+
+## Save Options
+
+<Warning>
+The `--save-all` and `--save-bad` flags are mutually exclusive.
+</Warning>
+
+<ParamField path="save-bad" type="boolean" default="false">
+  Save only test cases that fail (WA, TLE, RTE, MLE states).
+  
+  ```bash
+  --save-bad
+  ```
+</ParamField>
+
+<ParamField path="save-all" type="boolean" default="false">
+  Save all test cases regardless of their result.
+  
+  ```bash
+  --save-all
+  ```
+</ParamField>
+
+## Run Filters
+
+Use these flags to run specific subsets of previously saved test cases:
+
+<ParamField path="run-all" type="boolean" default="false">
+  Run all saved test cases.
+</ParamField>
+
+<ParamField path="run-ac" type="boolean" default="false">
+  Run only test cases that previously passed (Accepted status).
+</ParamField>
+
+<ParamField path="run-wa" type="boolean" default="false">
+  Run only test cases that previously failed with Wrong Answer.
+</ParamField>
+
+<ParamField path="run-tle" type="boolean" default="false">
+  Run only test cases that previously exceeded time limit.
+</ParamField>
+
+<ParamField path="run-mle" type="boolean" default="false">
+  Run only test cases that previously exceeded memory limit.
+</ParamField>
+
+<ParamField path="run-rte" type="boolean" default="false">
+  Run only test cases that previously had runtime errors.
+</ParamField>
+
+## How Checkers Work
+
+A checker script must:
+
+1. Read the original input (typically from `.qt/input.txt`)
+2. Read your solution's output from stdin
+3. Validate the output meets problem constraints
+4. Output "YES" if valid, "NO" otherwise
+
+## Examples
+
+### Basic Checker Test
+
+```bash
+qt check -t main.cpp -c checker.cpp -g gen.cpp --tc 500 --tout 1000
+```
+
+### Multiplication Problem Example
+
+Problem: Given `n`, output two numbers that multiply to `n`.
+
+<CodeGroup>
+```cpp main.cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    int n; cin >> n;
+    
+    // One valid solution
+    cout << 1 << " " << n << "\n";
+    
+    return 0;
+}
+```
+
+```cpp checker.cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    // Read original input
+    ifstream in(".qt/input.txt");
+    int n; in >> n;
+
+    // Read solution's output
+    int x, y;
+    cin >> x >> y;
+
+    // Validate: x * y must equal n
+    cout << (x * y == n ? "YES" : "NO") << endl;
+    
+    return 0;
+}
+```
+
+```cpp gen.cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+int main(int argc, char* argv[]) {
+    int seed = stoi(string(argv[1]));
+    srand(seed);
+
+    int n = rand() % int(1e5) + 1; // [1, 100000]
+    cout << n << "\n";
+
+    return 0;
+}
+```
+</CodeGroup>
+
+Run the test:
+
+```bash
+qt check -t main.cpp -c checker.cpp -g gen.cpp --tc 500 --tout 1000
+```
+
+### Debug Failed Validations
+
+<Steps>
+  <Step title="Run with save-bad flag">
+    Save test cases where the checker returns NO:
+    
+    ```bash
+    qt check -t main.cpp -c checker.cpp -g gen.cpp --tc 50 --tout 1000 --save-bad
+    ```
+  </Step>
+  
+  <Step title="Manually inspect saved cases">
+    Check the saved test case files to understand what inputs cause failures.
+  </Step>
+  
+  <Step title="Re-run failed cases">
+    After fixing, test only the previously failing cases:
+    
+    ```bash
+    qt check -t main.cpp -c checker.cpp -g gen.cpp --run-wa
+    ```
+  </Step>
+</Steps>
+
+### Graph Problem Example
+
+Problem: Output any valid Hamiltonian path in a graph (many solutions exist).
+
+<CodeGroup>
+```cpp checker.cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    // Read graph from input file
+    ifstream in(".qt/input.txt");
+    int n, m;
+    in >> n >> m;
+    
+    vector<vector<int>> adj(n);
+    for (int i = 0; i < m; i++) {
+        int u, v;
+        in >> u >> v;
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+    
+    // Read solution's path
+    vector<int> path(n);
+    for (int i = 0; i < n; i++) {
+        cin >> path[i];
+    }
+    
+    // Validate:
+    // 1. All nodes visited exactly once
+    set<int> visited(path.begin(), path.end());
+    if (visited.size() != n) {
+        cout << "NO" << endl;
+        return 0;
+    }
+    
+    // 2. Each consecutive pair has an edge
+    for (int i = 0; i < n - 1; i++) {
+        int u = path[i], v = path[i + 1];
+        if (find(adj[u].begin(), adj[u].end(), v) == adj[u].end()) {
+            cout << "NO" << endl;
+            return 0;
+        }
+    }
+    
+    cout << "YES" << endl;
+    return 0;
+}
+```
+</CodeGroup>
+
+### Using Existing Test Cases
+
+```bash
+qt check -t main.cpp -c checker.cpp -p test_cases/testcase --tc 10
+```
+
+### Save All for Analysis
+
+Save all test cases to study the variety of valid solutions:
+
+```bash
+qt check -t main.cpp -c checker.cpp -g gen.cpp --tc 100 --save-all
+```
+
+## Checker Best Practices
+
+<Tip>
+**Be thorough:** Check all problem constraints, not just the obvious ones. Include bounds checking, uniqueness, and structural requirements.
+</Tip>
+
+<Tip>
+**Handle edge cases:** Ensure your checker handles empty outputs, invalid formats, and boundary values gracefully.
+</Tip>
+
+<Tip>
+**Output only YES/NO:** Keep checker output simple. Don't add debugging information that could confuse QuickTest.
+</Tip>
+
+<Warning>
+**Read from the correct file:** QuickTest saves input to `.qt/input.txt`. Always read from this file, not stdin.
+</Warning>
+
+## Common Use Cases
+
+<CardGroup cols={2}>
+  <Card title="Multiple Valid Answers" icon="list-check">
+    Problems asking for "any" valid solution
+  </Card>
+  
+  <Card title="Approximate Solutions" icon="wave-square">
+    Answers within an epsilon tolerance
+  </Card>
+  
+  <Card title="Construction Problems" icon="hammer">
+    Build any structure meeting criteria
+  </Card>
+  
+  <Card title="Permutation Problems" icon="shuffle">
+    Any valid ordering or arrangement
+  </Card>
+</CardGroup>
+
+## Understanding Test Results
+
+QuickTest displays real-time results:
+
+- **AC** - Accepted (checker returned YES)
+- **WA** - Wrong Answer (checker returned NO)
+- **TLE** - Time Limit Exceeded
+- **MLE** - Memory Limit Exceeded
+- **RTE** - Runtime Error
+
+## Tips
+
+<Tip>
+**Test your checker separately:** Before using it with QuickTest, manually test your checker with known valid and invalid outputs.
+</Tip>
+
+<Tip>
+**Use --break-bad for debugging:** Stop at the first failure to investigate the issue immediately.
+</Tip>
+
+<Tip>
+**Start with a simple checker:** Build a basic checker first, verify it works, then add more sophisticated validation.
+</Tip>
+
+## See Also
+
+- [cmp](/commands/cmp) - Compare against a correct solution (for single-answer problems)
+- [stress](/commands/stress) - Test for time/memory limits only
+- [output](/commands/output) - Generate output files from test cases

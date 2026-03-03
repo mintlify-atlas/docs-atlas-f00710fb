@@ -1,0 +1,149 @@
+---
+title: Quick Test CLI
+description: Command Line Interface for automated stress testing in competitive programming
+---
+
+<img
+  className="block dark:hidden"
+  src="/images/hero-light.svg"
+  alt="Quick Test CLI Hero Light"
+/>
+<img
+  className="hidden dark:block"
+  src="/images/hero-dark.svg"
+  alt="Quick Test CLI Hero Dark"
+/>
+
+## Welcome to Quick Test CLI
+
+Quick Test CLI is a cross-platform tool designed for fast and easy stress testing in competitive programming, allowing you to focus entirely on the contest. Test your algorithms with confidence using automated test generation and validation.
+
+<CardGroup cols={2}>
+  <Card
+    title="Compare solutions"
+    icon="code-compare"
+    href="/commands/cmp"
+  >
+    Verify your algorithm by comparing it against a brute-force solution across hundreds of test cases
+  </Card>
+  <Card
+    title="Stress test"
+    icon="bolt"
+    href="/commands/stress"
+  >
+    Ensure your code executes within time limits using random test case generation
+  </Card>
+  <Card
+    title="Custom checkers"
+    icon="check-double"
+    href="/commands/check"
+  >
+    Validate problems with multiple correct answers using custom checker scripts
+  </Card>
+  <Card
+    title="Multi-language"
+    icon="globe"
+    href="/concepts/supported-languages"
+  >
+    Support for C++, Java, Python, Rust, Go, GNU C, and Kotlin
+  </Card>
+</CardGroup>
+
+## What is stress testing?
+
+In competitive programming, stress testing is a technique to validate your solution by running it against randomly generated test cases. Quick Test CLI automates this process by:
+
+1. Generating random test cases using a generator program
+2. Running your solution and a reference solution (or checker)
+3. Comparing outputs to find discrepancies
+4. Reporting errors with the exact test case that failed
+
+This helps you catch edge cases and bugs that sample test cases might miss.
+
+## Key features
+
+<AccordionGroup>
+  <Accordion title="Cross-platform support" icon="desktop">
+    Works seamlessly on Linux, Windows, and macOS with a single binary executable and no external dependencies.
+  </Accordion>
+  <Accordion title="Multiple testing modes" icon="list-check">
+    Choose from `cmp` (compare with correct solution), `stress` (time limit testing), `check` (custom validation), or `output` (batch test execution).
+  </Accordion>
+  <Accordion title="Seven programming languages" icon="code">
+    Native support for C++, Java, Python, Rust, Go, GNU C, and Kotlin with automatic compilation and execution.
+  </Accordion>
+  <Accordion title="Fast execution" icon="gauge-high">
+    Run hundreds or thousands of test cases in seconds with configurable timeouts and memory limits.
+  </Accordion>
+  <Accordion title="Test case management" icon="folder-tree">
+    Save failing test cases automatically and re-run specific categories (WA, TLE, RTE, AC).
+  </Accordion>
+  <Accordion title="Detailed diagnostics" icon="stethoscope">
+    Get clear error messages with diff output showing exactly where your solution differs from expected results.
+  </Accordion>
+</AccordionGroup>
+
+## How it works
+
+Quick Test CLI operates in different modes depending on your testing needs:
+
+### Compare mode (`cmp`)
+
+Verify your optimized solution against a slower but guaranteed-correct brute-force solution:
+
+```bash
+qt cmp -t main.cpp -c correct.cpp -g gen.cpp --tc 1000
+```
+
+The tool will:
+- Compile all three files
+- Generate 1000 random test cases using `gen.cpp`
+- Run both `main.cpp` and `correct.cpp` on each test case
+- Compare outputs and report any differences
+
+### Stress mode (`stress`)
+
+Test if your solution runs within time and memory limits:
+
+```bash
+qt stress -t main.cpp -g gen.cpp --tout 1000 --tc 500
+```
+
+### Check mode (`check`)
+
+For problems with multiple valid answers, use a custom checker:
+
+```bash
+qt check -t main.cpp -c checker.cpp -g gen.cpp --tc 1000
+```
+
+## Why Quick Test CLI?
+
+<CardGroup cols={2}>
+  <Card title="Save time" icon="clock">
+    No need to manually create test cases or write testing scripts
+  </Card>
+  <Card title="Catch bugs" icon="bug">
+    Find edge cases that sample tests miss before submitting
+  </Card>
+  <Card title="Build confidence" icon="shield-check">
+    Submit with confidence knowing your solution works on thousands of test cases
+  </Card>
+  <Card title="Stay focused" icon="bullseye">
+    Spend time solving problems, not debugging infrastructure
+  </Card>
+</CardGroup>
+
+## Ready to get started?
+
+<Steps>
+  <Step title="Install Quick Test CLI">
+    Follow the [installation guide](/installation) to install on your platform
+  </Step>
+  <Step title="Learn the basics">
+    Complete the [quickstart tutorial](/quickstart) to run your first stress test
+  </Step>
+  <Step title="Explore commands">
+    Discover all testing modes in the [commands documentation](/commands/cmp)
+  </Step>
+</Steps>

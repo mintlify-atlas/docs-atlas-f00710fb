@@ -1,0 +1,497 @@
+---
+title: Flags Reference
+description: Complete reference of all flags and their behaviors in Quick Test CLI
+---
+
+This page documents all flags available in Quick Test CLI, organized by category.
+
+## File Path Flags
+
+These flags specify the files used during testing.
+
+### Target File
+
+```bash
+-t, --target-file <FILE>
+```
+
+The solution file you want to test. This is required for all testing commands.
+
+**Type:** `PathBuf`
+
+**Required in:** `stress`, `cmp`, `check`, `output`
+
+**Example:**
+```bash
+quicktest stress --target-file solution.cpp
+```
+
+### Generator File
+
+```bash
+-g, --gen-file <FILE>
+```
+
+A program that generates random test cases. When not specified, Quick Test will look for existing test cases or use manual input.
+
+**Type:** `PathBuf`
+
+**Default:** `""` (empty)
+
+**Available in:** `stress`, `cmp`, `check`
+
+**Example:**
+```bash
+quicktest stress -t solution.cpp -g generator.cpp
+```
+
+### Correct File
+
+```bash
+-c, --correct-file <FILE>
+```
+
+A known correct solution to compare against your target file.
+
+**Type:** `PathBuf`
+
+**Required in:** `cmp`
+
+**Example:**
+```bash
+quicktest cmp -t solution.cpp -c correct.cpp
+```
+
+### Checker File
+
+```bash
+-c, --checker-file <FILE>
+```
+
+A custom checker program that validates the output. Used for problems with multiple valid answers.
+
+**Type:** `PathBuf`
+
+**Required in:** `check`
+
+**Example:**
+```bash
+quicktest check -t solution.cpp -c checker.cpp
+```
+
+---
+
+## Resource Limit Flags
+
+These flags control execution limits for your programs.
+
+### Timeout
+
+```bash
+--timeout <MS>
+--tout <MS>
+```
+
+Maximum execution time allowed in milliseconds. If exceeded, the test case receives a TLE (Time Limit Exceeded) status.
+
+**Type:** `u32`
+
+**Default:** `2000` (2 seconds)
+
+**Range:** Any positive integer
+
+**Available in:** `stress`, `cmp`, `check`, `output`
+
+**Examples:**
+```bash
+# 3 second timeout
+quicktest stress -t solution.cpp --timeout 3000
+
+# Using alias
+quicktest stress -t solution.cpp --tout 1500
+```
+
+### Memory Limit
+
+```bash
+--memory-limit <BYTES>
+--ml <BYTES>
+```
+
+Maximum memory allowed in bytes. If exceeded, the test case receives an MLE (Memory Limit Exceeded) status.
+
+**Type:** `u64`
+
+**Default:** `1000000000` (1GB)
+
+**Range:** Any positive integer
+
+**Available in:** `stress`, `cmp`, `check`, `output`
+
+**Examples:**
+```bash
+# 512MB limit
+quicktest stress -t solution.cpp --memory-limit 512000000
+
+# Using alias
+quicktest stress -t solution.cpp --ml 256000000
+```
+
+---
+
+## Test Control Flags
+
+These flags control the number and selection of test cases.
+
+### Test Cases
+
+```bash
+--test-cases <NUMBER>
+--tc <NUMBER>
+```
+
+Number of test cases to generate and run.
+
+**Type:** `u32`
+
+**Default:** `1000`
+
+**Range:** Any positive integer
+
+**Available in:** `stress`, `cmp`, `check`
+
+**Examples:**
+```bash
+# Run 500 test cases
+quicktest stress -t solution.cpp --test-cases 500
+
+# Using alias
+quicktest stress -t solution.cpp --tc 100
+```
+
+### Prefix
+
+```bash
+-p, --prefix <STRING>
+```
+
+Prefix for saved test case files. Test cases will be saved with this prefix followed by the status and number.
+
+**Type:** `String`
+
+**Default:** `""` (empty)
+
+**Available in:** `stress`, `cmp`, `check`, `output`
+
+**Example:**
+```bash
+quicktest stress -t solution.cpp --prefix my_test --save-bad
+# Creates files like: my_test_testcase_wa_1.in, my_test_testcase_wa_1.out
+```
+
+---
+
+## Execution Control Flags
+
+These flags modify the execution behavior.
+
+### Break on Bad
+
+```bash
+-b, --break-bad
+--break
+```
+
+Stop execution immediately when a bad test case is found (WA, TLE, RTE, or MLE).
+
+**Type:** `boolean`
+
+**Default:** `false`
+
+**Available in:** `stress`, `cmp`, `check`, `output`
+
+**Example:**
+```bash
+quicktest stress -t solution.cpp --break-bad
+quicktest cmp -t solution.cpp -c correct.cpp -b
+```
+
+<Tip>
+  Use this flag to quickly find the first failing test case without running all tests.
+</Tip>
+
+---
+
+## Saving Flags
+
+These flags control which test cases are saved to disk.
+
+### Save Bad
+
+```bash
+--save-bad
+```
+
+Save only test cases that result in WA, TLE, RTE, or MLE status. Useful for debugging failures.
+
+**Type:** `boolean`
+
+**Default:** `false`
+
+**Conflicts with:** `--save-all`
+
+**Available in:** `stress`, `cmp`, `check`
+
+**Example:**
+```bash
+quicktest stress -t solution.cpp --save-bad
+```
+
+### Save All
+
+```bash
+--save-all
+```
+
+Save all test cases regardless of status (AC, WA, TLE, RTE, MLE).
+
+**Type:** `boolean`
+
+**Default:** `false`
+
+**Conflicts with:** `--save-bad`
+
+**Available in:** `stress`, `cmp`, `check`
+
+**Example:**
+```bash
+quicktest stress -t solution.cpp --save-all
+```
+
+### Save Output
+
+```bash
+--save-out
+```
+
+Save the output file for each test case when using the output command.
+
+**Type:** `boolean`
+
+**Default:** `false`
+
+**Available in:** `output`
+
+**Example:**
+```bash
+quicktest output -t solution.cpp -p test --save-out
+```
+
+<Warning>
+  `--save-bad` and `--save-all` are mutually exclusive. Use only one at a time.
+</Warning>
+
+---
+
+## Run Filter Flags
+
+These flags allow you to run specific subsets of previously saved test cases.
+
+### Run All
+
+```bash
+--run-all
+```
+
+Run all previously saved test cases regardless of their status.
+
+**Type:** `boolean`
+
+**Available in:** `stress`, `cmp`, `check`
+
+**Example:**
+```bash
+quicktest stress -t solution.cpp --run-all
+```
+
+### Run AC
+
+```bash
+--run-ac
+```
+
+Run only test cases that previously received Accepted status.
+
+**Type:** `boolean`
+
+**Available in:** `stress`, `cmp`, `check`
+
+**Example:**
+```bash
+quicktest stress -t solution.cpp --run-ac
+```
+
+### Run WA
+
+```bash
+--run-wa
+```
+
+Run only test cases that previously received Wrong Answer status.
+
+**Type:** `boolean`
+
+**Available in:** `stress`, `cmp`, `check`
+
+**Example:**
+```bash
+quicktest cmp -t solution.cpp -c correct.cpp --run-wa --diff
+```
+
+### Run TLE
+
+```bash
+--run-tle
+```
+
+Run only test cases that previously received Time Limit Exceeded status.
+
+**Type:** `boolean`
+
+**Available in:** `stress`, `cmp`, `check`
+
+**Example:**
+```bash
+quicktest stress -t solution.cpp --run-tle
+```
+
+### Run RTE
+
+```bash
+--run-rte
+```
+
+Run only test cases that previously received Runtime Error status.
+
+**Type:** `boolean`
+
+**Available in:** `stress`, `cmp`, `check`
+
+**Example:**
+```bash
+quicktest stress -t solution.cpp --run-rte
+```
+
+### Run MLE
+
+```bash
+--run-mle
+```
+
+Run only test cases that previously received Memory Limit Exceeded status.
+
+**Type:** `boolean`
+
+**Available in:** `stress`, `cmp`, `check`
+
+**Example:**
+```bash
+quicktest stress -t solution.cpp --run-mle
+```
+
+<Note>
+  Run filter flags can be combined to run multiple status types. For example, use both `--run-wa` and `--run-tle` to run all WA and TLE test cases.
+</Note>
+
+---
+
+## Output Flags
+
+These flags control how results are displayed.
+
+### Diff
+
+```bash
+-d, --diff
+```
+
+Show differences between expected output and actual output when using the `cmp` command.
+
+**Type:** `boolean`
+
+**Default:** `false`
+
+**Available in:** `cmp`
+
+**Example:**
+```bash
+quicktest cmp -t solution.cpp -c correct.cpp --diff
+```
+
+<Tip>
+  The `--diff` flag provides a line-by-line comparison, making it easy to spot where your output differs from the expected output.
+</Tip>
+
+---
+
+## Setup Flags
+
+These flags are used with the `setup` command for configuration.
+
+### Label
+
+```bash
+-l, --label <LABEL>
+```
+
+Configuration label to update. Format: `Language.SETTING`
+
+**Type:** `String`
+
+**Required in:** `setup config`
+
+**Example:**
+```bash
+quicktest setup config --label "cpp.PROGRAM" --value "g++"
+```
+
+### Value
+
+```bash
+-v, --value <VALUE>
+```
+
+New value for the configuration setting.
+
+**Type:** `String`
+
+**Required in:** `setup config`
+
+**Example:**
+```bash
+quicktest setup config --label "cpp.STANDARD" --value "-std=c++17"
+```
+
+---
+
+## Example Flags
+
+These flags are used with the `example` command to show usage examples.
+
+```bash
+--stress    # Show stress command examples
+--cmp       # Show cmp command examples
+--check     # Show check command examples
+--output    # Show output command examples
+--setup     # Show setup command examples
+```
+
+**Type:** `boolean`
+
+**Mutually exclusive:** Exactly one must be specified
+
+**Example:**
+```bash
+quicktest example --stress
+quicktest example --cmp
+```

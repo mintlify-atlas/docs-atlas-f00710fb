@@ -1,0 +1,231 @@
+---
+title: Getting started
+description: Step-by-step guide to start stress testing with Quick Test CLI
+---
+
+Quick Test CLI is a cross-platform tool designed for fast and easy stress testing in competitive programming. This guide will help you run your first stress test.
+
+## What is stress testing?
+
+Stress testing in competitive programming helps you:
+
+- Find edge cases where your solution fails
+- Verify correctness against a brute-force solution
+- Detect time limit exceeded (TLE) issues
+- Test with hundreds or thousands of random inputs automatically
+
+## Prerequisites
+
+Before you begin, ensure you have:
+
+- Quick Test CLI installed ([see installation guide](/installation))
+- A compiler for your programming language (g++, python3, javac, etc.)
+- Basic familiarity with competitive programming
+
+## Your first stress test
+
+<Steps>
+  <Step title="Prepare your files">
+    You'll need three files for a basic stress test with `quicktest cmp`:
+
+    - **Target file**: Your optimized solution to test
+    - **Correct file**: A brute-force solution (slower but guaranteed correct)
+    - **Generator file**: Creates random test cases
+
+    Create a directory for your problem:
+
+    ```bash
+    mkdir my-problem
+    cd my-problem
+    ```
+  </Step>
+
+  <Step title="Write a generator">
+    Create `gen.cpp` to generate random test cases:
+
+    ```cpp gen.cpp
+    #include <bits/stdc++.h>
+    using namespace std;
+
+    int main(int argc, char* argv[]) {
+        // quicktest passes a seed as an argument
+        int seed = stoi(string(argv[1]));
+        srand(seed);
+
+        int n = rand() % 1000 + 1;
+        cout << n << "\n";
+
+        default_random_engine generator;
+        uniform_int_distribution<int> distribution(-100000, 100000);
+
+        for(int i = 0; i < n; i++) {
+            if(i > 0) cout << " ";
+            cout << distribution(generator);
+        }
+        return 0;
+    }
+    ```
+
+    <Note>
+      The generator must accept a seed argument from quicktest to ensure reproducible test cases.
+    </Note>
+  </Step>
+
+  <Step title="Write the correct solution">
+    Create `correct.cpp` with a brute-force approach:
+
+    ```cpp correct.cpp
+    #include <bits/stdc++.h>
+    using namespace std;
+
+    int main() {
+        // Maximum Subarray Problem - O(n²) solution
+        int n; cin >> n;
+        vector<int> values(n);
+        for(int &a: values)
+            cin >> a;
+        
+        int best = 0;
+        for (int i = 0; i < n; i++) {
+            int sum = 0;
+            for (int j = i; j < n; j++) {
+                sum += values[j];
+                best = max(best, sum);
+            }
+        }
+        cout << best << "\n";
+        return 0;
+    }
+    ```
+  </Step>
+
+  <Step title="Write your target solution">
+    Create `main.cpp` with your optimized solution:
+
+    ```cpp main.cpp
+    #include <bits/stdc++.h>
+    using namespace std;
+
+    int main() {
+        // Maximum Subarray Problem - O(n) solution
+        int n; cin >> n;
+        vector<int> values(n);
+        for(int &a: values)
+            cin >> a;
+        
+        int best = 0, sum = 0;
+        for (int i = 0; i < n; i++) {
+            sum = max(values[i], sum + values[i]);
+            best = max(best, sum);
+        }
+        cout << best << "\n";
+        return 0;
+    }
+    ```
+  </Step>
+
+  <Step title="Run the stress test">
+    Execute the comparison test:
+
+    ```bash
+    quicktest cmp --target-file=main.cpp --correct-file=correct.cpp --gen-file=gen.cpp --test-cases=100 --timeout=1000
+    ```
+
+    Or use the shorter alias:
+
+    ```bash
+    qt cmp -t main.cpp -c correct.cpp -g gen.cpp --tc 100 --tout 1000
+    ```
+
+    <Tip>
+      Use `qt` as a shorthand for `quicktest` to save time during contests.
+    </Tip>
+  </Step>
+
+  <Step title="Interpret the results">
+    Quick Test will show you:
+
+    - **AC (Accepted)**: Output matches the correct solution
+    - **WA (Wrong Answer)**: Output differs from the correct solution
+    - **TLE (Time Limit Exceeded)**: Execution exceeded the timeout
+    - **RTE (Runtime Error)**: Program crashed or exited with an error
+
+    If you find a WA, use `--save-bad` to save failing test cases:
+
+    ```bash
+    qt cmp -t main.cpp -c correct.cpp -g gen.cpp --tc 100 --tout 1000 --save-bad
+    ```
+
+    Test cases are saved in the `.qt/testcases/` directory.
+  </Step>
+</Steps>
+
+## Understanding test modes
+
+Quick Test provides different testing modes for various scenarios:
+
+<Accordion title="quicktest cmp - Compare against correct solution">
+  Use when you have a brute-force solution to verify correctness.
+
+  ```bash
+  qt cmp -t main.cpp -c correct.cpp -g gen.cpp --tc 500
+  ```
+
+  Best for: Finding wrong answer bugs
+</Accordion>
+
+<Accordion title="quicktest stress - Test for time limits">
+  Use when you only want to check for TLE issues without comparing outputs.
+
+  ```bash
+  qt stress -t main.cpp -g gen.cpp --tc 100 --tout 1000
+  ```
+
+  Best for: Performance testing
+</Accordion>
+
+<Accordion title="quicktest check - Custom checker validation">
+  Use for problems with multiple valid answers (requires a checker script).
+
+  ```bash
+  qt check -t main.cpp -c checker.cpp -g gen.cpp --tc 500
+  ```
+
+  Best for: Problems with multiple correct outputs
+</Accordion>
+
+<Accordion title="quicktest output - Run against saved test cases">
+  Use to run your solution against pre-made test cases.
+
+  ```bash
+  qt output -t main.cpp -p test_cases/testcase_ac
+  ```
+
+  Best for: Testing with official sample inputs
+</Accordion>
+
+## Quick reference
+
+| Command | Purpose | Required Files |
+|---------|---------|----------------|
+| `qt cmp` | Compare outputs | target, correct, generator |
+| `qt stress` | Check time limits | target, generator |
+| `qt check` | Custom validation | target, checker, generator |
+| `qt output` | Run saved tests | target, test files |
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Configuration" icon="gear" href="/guides/configuration">
+    Customize compiler flags and language settings
+  </Card>
+  <Card title="Examples" icon="code" href="/guides/examples">
+    Explore real-world usage patterns
+  </Card>
+  <Card title="Troubleshooting" icon="wrench" href="/guides/troubleshooting">
+    Fix common issues
+  </Card>
+  <Card title="CLI Reference" icon="terminal" href="/reference/command-options">
+    View all available commands and options
+  </Card>
+</CardGroup>

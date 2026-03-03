@@ -1,0 +1,648 @@
+---
+title: Troubleshooting
+description: Common issues and solutions when using Quick Test CLI
+---
+
+This guide helps you resolve common issues when using Quick Test CLI for stress testing.
+
+## Installation issues
+
+<AccordionGroup>
+  <Accordion title="Command not found: quicktest">
+    **Problem**: The `quicktest` or `qt` command is not recognized.
+
+    **Solutions**:
+
+    1. Verify installation completed successfully:
+       ```bash
+       quicktest --version
+       ```
+
+    2. Check if the installation directory is in your PATH:
+       ```bash
+       echo $PATH
+       ```
+
+    3. Try reopening your terminal or reloading your shell configuration:
+       ```bash
+       source ~/.bashrc  # or ~/.zshrc for zsh
+       ```
+
+    4. Reinstall Quick Test CLI following the [installation guide](/installation)
+  </Accordion>
+
+  <Accordion title="Compiler not found (g++, javac, etc.)">
+    **Problem**: Error message like "g++: command not found" or "javac: command not found".
+
+    **Solution**: Install the required compiler for your language:
+
+    <Tabs>
+      <Tab title="C++ (g++)">
+        **Linux (Ubuntu/Debian)**:
+        ```bash
+        sudo apt-get update
+        sudo apt-get install build-essential
+        ```
+
+        **macOS**:
+        ```bash
+        xcode-select --install
+        ```
+
+        **Windows**:
+        Install MinGW or use WSL (Windows Subsystem for Linux)
+      </Tab>
+
+      <Tab title="Java">
+        **Linux (Ubuntu/Debian)**:
+        ```bash
+        sudo apt-get install default-jdk
+        ```
+
+        **macOS**:
+        ```bash
+        brew install openjdk
+        ```
+
+        **Windows**:
+        Download from [Oracle](https://www.oracle.com/java/technologies/downloads/) or use OpenJDK
+      </Tab>
+
+      <Tab title="Python 3">
+        **Linux (Ubuntu/Debian)**:
+        ```bash
+        sudo apt-get install python3
+        ```
+
+        **macOS**:
+        ```bash
+        brew install python3
+        ```
+
+        **Windows**:
+        Download from [python.org](https://www.python.org/downloads/)
+      </Tab>
+    </Tabs>
+
+    Verify installation:
+    ```bash
+    g++ --version
+    javac --version
+    python3 --version
+    ```
+  </Accordion>
+
+  <Accordion title="Permission denied errors">
+    **Problem**: Permission errors when running quicktest.
+
+    **Solutions**:
+
+    1. Make sure you have write permissions in the working directory:
+       ```bash
+       ls -la
+       ```
+
+    2. Ensure the `.qt/` directory can be created:
+       ```bash
+       mkdir .qt
+       chmod 755 .qt
+       ```
+
+    3. On Unix systems, check if compiled binaries are executable:
+       ```bash
+       chmod +x .qt/main .qt/gen .qt/correct
+       ```
+  </Accordion>
+</AccordionGroup>
+
+## Compilation errors
+
+<AccordionGroup>
+  <Accordion title="Compilation failed for target/correct/gen file">
+    **Problem**: Quick Test reports compilation failure.
+
+    **Debugging steps**:
+
+    1. Compile manually to see the full error message:
+       ```bash
+       g++ -std=c++17 -Wall -DONLINE_JUDGE=1 main.cpp -o test
+       ```
+
+    2. Common causes:
+       - Syntax errors in your code
+       - Missing headers (`#include <bits/stdc++.h>`)
+       - Wrong C++ standard (Quick Test uses C++17)
+
+    3. Check if your code compiles without `-DONLINE_JUDGE=1`:
+       ```bash
+       g++ -std=c++17 main.cpp -o test
+       ```
+
+    <Tip>
+      Use the same compilation flags that Quick Test uses to ensure compatibility.
+    </Tip>
+  </Accordion>
+
+  <Accordion title="Java: Main class not found">
+    **Problem**: Error message "Could not find or load main class Main".
+
+    **Solution**:
+
+    1. Ensure your main class is named `Main`:
+       ```java
+       public class Main {  // Must be "Main", not "main" or other names
+           public static void main(String[] args) {
+               // Your code
+           }
+       }
+       ```
+
+    2. File must be named `Main.java`
+
+    3. Clear the `.qt/` directory and retry:
+       ```bash
+       rm -rf .qt/
+       qt cmp -t Main.java -c Correct.java -g Gen.java
+       ```
+  </Accordion>
+
+  <Accordion title="Rust: cargo build failed">
+    **Problem**: Rust compilation errors with cargo.
+
+    **Solutions**:
+
+    1. Ensure Rust and cargo are installed:
+       ```bash
+       rustc --version
+       cargo --version
+       ```
+
+    2. Check if `~/.quicktest/rust/` directory exists and is properly initialized:
+       ```bash
+       ls -la ~/.quicktest/rust/
+       cat ~/.quicktest/rust/Cargo.toml
+       ```
+
+    3. Manually initialize if needed:
+       ```bash
+       cargo init ~/.quicktest/rust
+       ```
+
+    4. Clean the cargo cache:
+       ```bash
+       cargo clean --manifest-path ~/.quicktest/rust/Cargo.toml
+       ```
+  </Accordion>
+</AccordionGroup>
+
+## Runtime errors
+
+<AccordionGroup>
+  <Accordion title="All test cases show RTE (Runtime Error)">
+    **Problem**: Every test case fails with runtime error.
+
+    **Common causes**:
+
+    1. **Array index out of bounds**: Check loop conditions
+       ```cpp
+       // Wrong
+       for (int i = 0; i <= n; i++)  // Should be i < n
+       
+       // Correct
+       for (int i = 0; i < n; i++)
+       ```
+
+    2. **Division by zero**: Add checks before division
+       ```cpp
+       if (divisor != 0) {
+           result = numerator / divisor;
+       }
+       ```
+
+    3. **Stack overflow**: Reduce recursion depth or use iteration
+
+    4. **Memory allocation**: Check if memory limits are appropriate:
+       ```bash
+       qt cmp -t main.cpp -c correct.cpp -g gen.cpp --ml 2000000000  # 2GB
+       ```
+
+    **Debugging**:
+
+    ```bash
+    # Save a failing test case
+    qt cmp -t main.cpp -c correct.cpp -g gen.cpp --save-bad --break
+    
+    # Run manually with saved input
+    ./qt/main < .qt/testcases/testcase_rte_001.txt
+    
+    # Use gdb for detailed debugging
+    gdb .qt/main
+    (gdb) run < .qt/testcases/testcase_rte_001.txt
+    ```
+  </Accordion>
+
+  <Accordion title="Generator crashes or produces invalid input">
+    **Problem**: The generator file exits with an error or creates malformed input.
+
+    **Solutions**:
+
+    1. Test the generator manually:
+       ```bash
+       # Compile generator
+       g++ -std=c++17 gen.cpp -o gen_test
+       
+       # Run with different seeds
+       ./gen_test 1
+       ./gen_test 42
+       ./gen_test 12345
+       ```
+
+    2. Ensure generator accepts seed argument:
+       ```cpp
+       int main(int argc, char* argv[]) {
+           if (argc < 2) {
+               cerr << "Usage: ./gen <seed>" << endl;
+               return 1;
+           }
+           int seed = stoi(string(argv[1]));
+           srand(seed);
+           // ...
+       }
+       ```
+
+    3. Validate generated output format matches expected input format
+
+    <Warning>
+      Always test your generator independently before using it in stress tests.
+    </Warning>
+  </Accordion>
+
+  <Accordion title="Checker always returns NO">
+    **Problem**: In `check` mode, the checker rejects all outputs.
+
+    **Solutions**:
+
+    1. Verify the checker reads input from the correct location:
+       ```cpp
+       // Correct way to read input in checker
+       ifstream in(".qt/input.txt");
+       int n; in >> n;
+       ```
+
+    2. Test the checker manually:
+       ```bash
+       # Create test input
+       echo "12" > .qt/input.txt
+       
+       # Run target program
+       echo "3 4" | ./.qt/main
+       
+       # Run checker (should output YES)
+       echo "3 4" | ./.qt/checker
+       ```
+
+    3. Ensure checker outputs exactly "YES" or "NO":
+       ```cpp
+       cout << (x * y == n ? "YES" : "NO") << endl;
+       ```
+  </Accordion>
+</AccordionGroup>
+
+## Wrong Answer issues
+
+<AccordionGroup>
+  <Accordion title="Getting WA but can't find the bug">
+    **Problem**: Stress test finds wrong answers but the bug isn't obvious.
+
+    **Debugging workflow**:
+
+    1. Save the failing test case:
+       ```bash
+       qt cmp -t main.cpp -c correct.cpp -g gen.cpp --save-bad --break
+       ```
+
+    2. Examine the saved test case:
+       ```bash
+       cat .qt/testcases/testcase_wa_001.txt
+       ```
+
+    3. Run both solutions manually and compare:
+       ```bash
+       # Run your solution
+       ./.qt/main < .qt/testcases/testcase_wa_001.txt
+       
+       # Run correct solution
+       ./.qt/correct < .qt/testcases/testcase_wa_001.txt
+       ```
+
+    4. Use `--diff` to see exact differences:
+       ```bash
+       qt cmp -t main.cpp -c correct.cpp -g gen.cpp --run-wa --diff
+       ```
+
+    5. Add debug output to your solution (remove before submitting):
+       ```cpp
+       #ifndef ONLINE_JUDGE
+       cerr << "Debug: i=" << i << " sum=" << sum << endl;
+       #endif
+       ```
+  </Accordion>
+
+  <Accordion title="WA on edge cases only">
+    **Problem**: Solution passes most tests but fails on edge cases.
+
+    **Common edge cases to test**:
+
+    1. **Minimum input**: n = 1, array with one element
+    2. **Maximum input**: n = 10^5, large numbers
+    3. **Zero values**: All zeros, negative numbers
+    4. **Empty subsets**: No valid answer exists
+
+    **Create targeted test files**:
+
+    ```bash
+    # Create edge case tests
+    echo "1\n42" > edge_min.txt
+    echo "0" > edge_zero.txt
+    
+    # Test against edge cases
+    ./.qt/main < edge_min.txt
+    ./.qt/correct < edge_min.txt
+    ```
+
+    **Modify generator to include edge cases**:
+
+    ```cpp
+    int main(int argc, char* argv[]) {
+        int seed = stoi(string(argv[1]));
+        srand(seed);
+        
+        // Force edge cases for first few seeds
+        if (seed == 0) {
+            cout << "1\n0\n";  // Minimum case
+            return 0;
+        }
+        if (seed == 1) {
+            cout << "100000\n";  // Maximum case
+            // ...
+            return 0;
+        }
+        
+        // Normal random generation for other seeds
+        // ...
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Performance issues
+
+<AccordionGroup>
+  <Accordion title="All test cases timeout (TLE)">
+    **Problem**: Every test exceeds the time limit.
+
+    **Solutions**:
+
+    1. **Check if timeout is reasonable**:
+       ```bash
+       # Increase timeout for interpreted languages
+       qt stress -t main.py -g gen.py --tout 5000  # 5 seconds
+       ```
+
+    2. **Test algorithm complexity**: Your solution might be too slow
+       - O(n²) when O(n log n) is needed
+       - O(2^n) when O(n²) is needed
+
+    3. **Reduce generator constraints temporarily**:
+       ```cpp
+       // Temporary: smaller test cases
+       const int N = 100;  // Instead of 100000
+       ```
+
+    4. **Test compiled binary directly**:
+       ```bash
+       time ./.qt/main < .qt/input.txt
+       ```
+
+    5. **Enable compiler optimizations** (for local testing):
+       ```bash
+       g++ -std=c++17 -O2 main.cpp -o main_optimized
+       time ./main_optimized < .qt/input.txt
+       ```
+
+    <Note>
+      Online judges use different optimization flags, so local performance may differ.
+    </Note>
+  </Accordion>
+
+  <Accordion title="Stress testing is very slow">
+    **Problem**: Running stress tests takes too long.
+
+    **Optimizations**:
+
+    1. **Reduce test cases for initial testing**:
+       ```bash
+       # Quick test first
+       qt cmp -t main.cpp -c correct.cpp -g gen.cpp --tc 50 --break
+       
+       # Full test only if quick test passes
+       qt cmp -t main.cpp -c correct.cpp -g gen.cpp --tc 1000
+       ```
+
+    2. **Use `--break` to stop on first failure**:
+       ```bash
+       qt cmp -t main.cpp -c correct.cpp -g gen.cpp --break
+       ```
+
+    3. **Reduce generator complexity**: Generate smaller test cases
+
+    4. **Test correct solution speed separately**:
+       ```bash
+       qt stress -t correct.cpp -g gen.cpp --tc 10
+       ```
+       If the correct solution is too slow, reduce input size in generator.
+  </Accordion>
+
+  <Accordion title="Memory limit exceeded">
+    **Problem**: Solutions crash with memory errors.
+
+    **Solutions**:
+
+    1. **Increase memory limit**:
+       ```bash
+       qt cmp -t main.cpp -c correct.cpp -g gen.cpp --ml 2000000000  # 2GB
+       ```
+
+    2. **Check for memory leaks**: Use vectors instead of manual allocation
+
+    3. **Reduce array sizes**: Optimize memory usage
+       ```cpp
+       // Instead of
+       int dp[1000000][1000000];  // Too large
+       
+       // Use
+       vector<vector<int>> dp(n, vector<int>(m));  // Dynamic sizing
+       ```
+  </Accordion>
+</AccordionGroup>
+
+## File and path issues
+
+<AccordionGroup>
+  <Accordion title="File not found errors">
+    **Problem**: Quick Test can't find the specified files.
+
+    **Solutions**:
+
+    1. **Check file paths**: Ensure files exist in the current directory
+       ```bash
+       ls -la *.cpp
+       ```
+
+    2. **Use relative paths correctly**:
+       ```bash
+       # From current directory
+       qt cmp -t main.cpp -c correct.cpp -g gen.cpp
+       
+       # From parent directory
+       qt cmp -t cpp/main.cpp -c cpp/correct.cpp -g cpp/gen.cpp
+       ```
+
+    3. **Check file extensions match your language**:
+       - C++: `.cpp`, `.cc`, `.cxx`
+       - Python: `.py`
+       - Java: `.java`
+       - Rust: `.rs`
+  </Accordion>
+
+  <Accordion title="Test case files not found (--prefix)">
+    **Problem**: When using `--prefix`, test files are not detected.
+
+    **Solutions**:
+
+    1. **Verify test files exist**:
+       ```bash
+       ls -la test_cases/testcase_ac*
+       ```
+
+    2. **Use correct prefix format**:
+       ```bash
+       # Correct: prefix without file number
+       qt cmp -t main.cpp -c correct.cpp -p test_cases/testcase_ac
+       
+       # Wrong: don't include the number
+       qt cmp -t main.cpp -c correct.cpp -p test_cases/testcase_ac_01
+       ```
+
+    3. **Check file naming convention**: Files should be numbered sequentially
+       ```
+       testcase_ac_01.txt
+       testcase_ac_02.txt
+       testcase_ac_03.txt
+       ```
+  </Accordion>
+</AccordionGroup>
+
+## macOS-specific issues
+
+<Accordion title="macOS compatibility warnings">
+  **Note**: Quick Test has been tested on Windows and Linux but not extensively on macOS.
+
+  **Known considerations**:
+
+  1. **Case-sensitive filenames**: macOS filesystem is case-insensitive by default
+  
+  2. **Compilation commands**: May differ slightly from Linux
+
+  3. **File paths**: Use Unix-style paths (`/Users/...` not `~`)
+
+  **If you encounter macOS-specific issues**:
+
+  - Report them at [GitHub Issues](https://github.com/LuchoBazz/quicktest/issues)
+  - Consider using a Linux virtual machine or Docker for consistent behavior
+
+  <Warning>
+    macOS users should test carefully and report any platform-specific issues.
+  </Warning>
+</Accordion>
+
+## Getting help
+
+<CardGroup cols={2}>
+  <Card title="View command help" icon="circle-question">
+    ```bash
+    qt --help
+    qt cmp --help
+    qt stress --help
+    qt check --help
+    ```
+  </Card>
+
+  <Card title="Check version" icon="tag">
+    ```bash
+    qt --version
+    ```
+  </Card>
+
+  <Card title="Report bugs" icon="bug" href="https://github.com/LuchoBazz/quicktest/issues">
+    Report issues on GitHub with:
+    - OS and version
+    - Quick Test version
+    - Full command used
+    - Error messages
+  </Card>
+
+  <Card title="View examples" icon="code" href="/guides/examples">
+    See working examples for reference
+  </Card>
+</CardGroup>
+
+## Quick diagnostic checklist
+
+When facing issues, check these in order:
+
+<Steps>
+  <Step title="Verify installation">
+    ```bash
+    qt --version
+    ```
+  </Step>
+
+  <Step title="Check compiler availability">
+    ```bash
+    g++ --version    # For C++
+    python3 --version  # For Python
+    javac --version  # For Java
+    ```
+  </Step>
+
+  <Step title="Test files exist">
+    ```bash
+    ls -la *.cpp *.py *.java
+    ```
+  </Step>
+
+  <Step title="Compile files manually">
+    ```bash
+    g++ -std=c++17 main.cpp -o test_main
+    ./test_main
+    ```
+  </Step>
+
+  <Step title="Test generator">
+    ```bash
+    ./.qt/gen 1
+    ./.qt/gen 42
+    ```
+  </Step>
+
+  <Step title="Run with minimal options">
+    ```bash
+    qt cmp -t main.cpp -c correct.cpp -g gen.cpp --tc 1
+    ```
+  </Step>
+</Steps>
+
+<Tip>
+  Most issues can be resolved by manually testing each component (compilation, generator, execution) independently.
+</Tip>

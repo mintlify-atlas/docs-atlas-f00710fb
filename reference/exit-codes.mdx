@@ -1,0 +1,361 @@
+---
+title: Exit Codes
+description: Exit codes and error status meanings in Quick Test CLI
+---
+
+Quick Test CLI uses standard exit codes and specific error contexts to communicate execution results and errors.
+
+## Standard Exit Codes
+
+| Exit Code | Constant | Meaning |
+|-----------|----------|----------|
+| `0` | `exitcode::OK` | Successful execution with no errors |
+| `1` | Error | General error occurred |
+
+<Note>
+  Quick Test uses the `exitcode` crate for standard exit codes. On successful completion of any command, the program exits with code `0`.
+</Note>
+
+---
+
+## Test Case Status Codes
+
+During test execution, each test case receives one of the following status codes:
+
+### AC (Accepted)
+
+**Meaning:** The solution produced the correct output within time and memory limits.
+
+**Enum Value:** `CPStatus::AC`
+
+**File Prefix:** `testcase_ac`
+
+**Example:**
+```
+Test case #1: AC (125ms)
+Test case #2: AC (98ms)
+```
+
+### WA (Wrong Answer)
+
+**Meaning:** The solution produced incorrect output.
+
+**Enum Value:** `CPStatus::WA`
+
+**File Prefix:** `testcase_wa`
+
+**Error Context:** `QTEST_WRONG_ANSWER`
+
+**Example:**
+```
+Test case #5: WA
+```
+
+<Tip>
+  Use the `--save-bad` flag to automatically save WA test cases for debugging.
+</Tip>
+
+### TLE (Time Limit Exceeded)
+
+**Meaning:** The solution exceeded the specified timeout.
+
+**Enum Value:** `CPStatus::TLE`
+
+**File Prefix:** `testcase_tle`
+
+**Error Context:** `QTEST_TIME_LIMIT_EXCEEDED`
+
+**Example:**
+```
+Test case #10: TLE (exceeded 2000ms)
+```
+
+### RTE (Runtime Error)
+
+**Meaning:** The solution crashed or exited with a non-zero status code.
+
+**Enum Value:** `CPStatus::RTE`
+
+**File Prefix:** `testcase_rte`
+
+**Error Context:** `QTEST_RUNTIME_ERROR`
+
+**Example:**
+```
+Test case #3: RTE
+```
+
+### MLE (Memory Limit Exceeded)
+
+**Meaning:** The solution exceeded the specified memory limit.
+
+**Enum Value:** `CPStatus::MLE`
+
+**File Prefix:** `testcase_mle`
+
+**Error Context:** `QTEST_MEMORY_LIMIT_EXCEEDED`
+
+**Example:**
+```
+Test case #7: MLE (exceeded 1GB)
+```
+
+### CE (Compilation Error)
+
+**Meaning:** The source file failed to compile.
+
+**Enum Value:** `CPStatus::CE`
+
+**Error Context:** `QTEST_COMPILER_ERROR`
+
+**Example:**
+```
+failed to compile the solution.cpp file
+```
+
+---
+
+## Error Contexts
+
+Quick Test uses error contexts to provide detailed error information. These contexts are used internally with the `failure` crate.
+
+### Compilation Errors
+
+**Context:** `QTEST_COMPILER_ERROR`
+
+**Trigger:** Compilation of target, generator, correct, or checker file fails
+
+**Message Format:**
+```
+failed to compile the <file_name> file / label <label>
+```
+
+### Runtime Errors
+
+**Context:** `QTEST_RUNTIME_ERROR`
+
+**Trigger:** Program exits with non-zero status or crashes
+
+**Message Format:**
+```
+<file_name> file exited by Runtime Error / label <label>
+```
+
+### Time Limit Exceeded
+
+**Context:** `QTEST_TIME_LIMIT_EXCEEDED`
+
+**Trigger:** Program execution exceeds specified timeout
+
+**Message Format:**
+```
+<file_name> very slow / label <label>
+```
+
+### Memory Limit Exceeded
+
+**Context:** `QTEST_MEMORY_LIMIT_EXCEEDED`
+
+**Trigger:** Program memory usage exceeds specified limit
+
+**Message Format:**
+```
+<file_name> file give memory limit exceeded / label <label>
+```
+
+---
+
+## File System Errors
+
+### Couldn't Create Folder
+
+**Context:** `QTEST_COULDNT_CREATE_FOLDER`
+
+**Trigger:** Failed to create required directory (e.g., `.qt/`, `test_cases/`)
+
+**Message Format:**
+```
+Could not create folder <folder_name>
+```
+
+### Couldn't Open File
+
+**Context:** `QTEST_COULDNT_OPEN_FILE`
+
+**Trigger:** Unable to open specified file for reading
+
+**Message Format:**
+```
+Can't open the file <file_name> / label <label>
+```
+
+### Couldn't Write to File
+
+**Context:** `QTEST_COULDNT_WRITE_TO_FILE`
+
+**Trigger:** Failed to write data to file
+
+**Message Format:**
+```
+Could not write to folder <folder_name>
+```
+
+### File Name Cannot Be Empty
+
+**Context:** `QTEST_FILE_NAME_CANNOT_BE_EMPTY`
+
+**Trigger:** Empty filename provided
+
+**Message:**
+```
+File Name cannot be empty
+```
+
+---
+
+## Configuration Errors
+
+### Extension Not Supported
+
+**Context:** `QTEST_EXTENSION_NOT_SOPPORTED_ERROR`
+
+**Trigger:** File has an unsupported extension
+
+**Message Format:**
+```
+extension '<ext>' of file '<file>' is not supported
+```
+
+**Supported Extensions:** `.cpp`, `.c`, `.py`, `.java`, `.rs`, etc. (defined in language configuration)
+
+### Configuration File Error
+
+**Context:** `QTEST_CONFIGURATION_FILE_ERROR`
+
+**Trigger:** Language configuration file contains errors or invalid JSON
+
+**Message Format:**
+```
+Configuration file <file_config> contains errors
+```
+
+**Configuration Location:** `~/.quicktest/languages.config.json`
+
+### Program Not Installed
+
+**Context:** `QTEST_PROGRAM_NOT_INSTALLED_ERROR`
+
+**Trigger:** Required compiler or interpreter not found
+
+**Message Format:**
+```
+Can't run program <program> because you don't have an application installed
+```
+
+**Example:**
+```bash
+# If g++ is not installed:
+Can't run program g++ because you don't have an application installed
+```
+
+### Setup Label Is Not Correct
+
+**Context:** `QTEST_SETUP_LABEL_IS_NOT_CORRECT_ERROR`
+
+**Trigger:** Invalid label format in setup command
+
+**Message Format:**
+```
+Setup label '<label>' is not correct
+```
+
+**Valid Format:** `Language.SETTING` (e.g., `cpp.PROGRAM`, `python.PROGRAM`)
+
+---
+
+## Break Flag Errors
+
+When the `--break-bad` flag is used, Quick Test exits immediately upon finding a bad test case.
+
+**Message Format:**
+```
+Wrong answer <status_name> on test <test_number>
+```
+
+**Context:** `<STATUS> status - break flag on`
+
+Where `<STATUS>` can be:
+- `WA` - Wrong Answer
+- `TLE` - Time Limit Exceeded  
+- `RTE` - Runtime Error
+- `MLE` - Memory Limit Exceeded
+
+**Example:**
+```
+Wrong answer TLE on test 42
+TLE status - break flag on
+```
+
+---
+
+## Constants Reference
+
+The following constants define default behaviors and file locations:
+
+### File Locations
+
+| Constant | Value | Description |
+|----------|-------|-------------|
+| `CACHE_FOLDER` | `.qt/` | Working directory for compiled binaries |
+| `TEST_CASES_FOLDER` | `test_cases` | Directory for saved test cases |
+| `OUTPUT_FOLDER` | `output` | Directory for output files |
+| `CONFIG_FOLDER` | `~/.quicktest` | Configuration directory |
+| `LANGUAGE_CONFIG_FILE` | `~/.quicktest/languages.config.json` | Language settings |
+
+### Binary Files (Unix)
+
+| Constant | Value |
+|----------|-------|
+| `TARGET_BINARY_FILE` | `.qt/main` |
+| `CORRECT_BINARY_FILE` | `.qt/correct` |
+| `CHECKER_BINARY_FILE` | `.qt/checker` |
+| `GEN_BINARY_FILE` | `.qt/gen` |
+
+### Binary Files (Windows)
+
+| Constant | Value |
+|----------|-------|
+| `TARGET_BINARY_FILE` | `.qt/main.exe` |
+| `CORRECT_BINARY_FILE` | `.qt/correct.exe` |
+| `CHECKER_BINARY_FILE` | `.qt/checker.exe` |
+| `GEN_BINARY_FILE` | `.qt/gen.exe` |
+
+### Temporary Files
+
+| Constant | Value | Purpose |
+|----------|-------|----------|
+| `QTEST_INPUT_FILE` | `.qt/input.txt` | Input for test case |
+| `QTEST_OUTPUT_FILE` | `.qt/output.txt` | Program output |
+| `QTEST_ERROR_FILE` | `.qt/error.txt` | Error output |
+| `QTEST_EXPECTED_FILE` | `.qt/expected.txt` | Expected output (cmp) |
+| `QTEST_CHECKER_FILE` | `.qt/checker.txt` | Checker output |
+
+### Test Case Prefixes
+
+| Constant | Value | Used For |
+|----------|-------|----------|
+| `PREFIX_AC_FILES` | `testcase_ac` | Accepted test cases |
+| `PREFIX_TLE_FILES` | `testcase_tle` | Time limit exceeded |
+| `PREFIX_WA_FILES` | `testcase_wa` | Wrong answer |
+| `PREFIX_RTE_FILES` | `testcase_rte` | Runtime error |
+| `PREFIX_MLE_FILES` | `testcase_mle` | Memory limit exceeded |
+
+### Timeouts
+
+| Constant | Value | Description |
+|----------|-------|-------------|
+| `GENERATOR_TIMEOUT` | `5000` | Generator timeout in milliseconds |
+
+<Warning>
+  The generator has a fixed timeout of 5 seconds (5000ms) regardless of the `--timeout` flag value.
+</Warning>

@@ -1,0 +1,470 @@
+---
+title: Supported languages
+description: Programming languages supported by Quick Test CLI with compilation and execution details
+---
+
+## Overview
+
+Quick Test CLI supports seven popular programming languages used in competitive programming. The tool automatically detects the language based on file extensions and handles compilation and execution appropriately.
+
+## Supported languages
+
+<CardGroup cols={2}>
+  <Card title="C++" icon="cpp">
+    GNU C++17 with competitive programming flags
+  </Card>
+  
+  <Card title="Python" icon="python">
+    Python 3 interpreter
+  </Card>
+  
+  <Card title="Java" icon="java">
+    Java Development Kit
+  </Card>
+  
+  <Card title="C" icon="c">
+    GNU GCC C11 compiler
+  </Card>
+  
+  <Card title="Rust" icon="rust">
+    Rust with popular competitive programming crates
+  </Card>
+  
+  <Card title="Go" icon="golang">
+    Go programming language
+  </Card>
+  
+  <Card title="Kotlin" icon="k">
+    Kotlin JVM compiler
+  </Card>
+</CardGroup>
+
+---
+
+## C++
+
+### File extensions
+```
+.hh, .hpp, .hxx, .h++, .cc, .cpp, .cxx, .c++
+```
+
+### Language details
+- **Standard**: C++17
+- **Compiler**: g++ (GNU C++ Compiler)
+- **Special flags**: `-DONLINE_JUDGE=1` is automatically added
+
+### Compilation and execution
+
+<Tabs>
+  <Tab title="Unix/Linux/macOS">
+    **Compilation:**
+    ```bash
+    g++ -std=c++17 -DONLINE_JUDGE=1 main.cpp -o .qt/main
+    ```
+    
+    **Execution:**
+    ```bash
+    ./.qt/main
+    ```
+  </Tab>
+  
+  <Tab title="Windows">
+    **Compilation:**
+    ```bash
+    g++ -std=c++17 -DONLINE_JUDGE=1 main.cpp -o .qt/main.exe
+    ```
+    
+    **Execution:**
+    ```bash
+    .qt/main.exe
+    ```
+  </Tab>
+</Tabs>
+
+<Info>
+The `-DONLINE_JUDGE=1` flag allows you to use conditional compilation in your code:
+
+```cpp
+#ifndef ONLINE_JUDGE
+    freopen("input.txt", "r", stdin);
+    freopen("output.txt", "w", stdout);
+#endif
+```
+</Info>
+
+---
+
+## Python
+
+### File extensions
+```
+.py
+```
+
+### Language details
+- **Version**: Python 3
+- **Interpreter**: python (or python3 depending on system configuration)
+
+### Execution
+
+<CodeGroup>
+```bash Unix/Linux/macOS
+python main.py
+```
+
+```bash Windows
+python main.py
+```
+</CodeGroup>
+
+<Note>
+Python is an interpreted language, so no compilation step is required. Quick Test CLI runs your script directly.
+</Note>
+
+---
+
+## Java
+
+### File extensions
+```
+.java
+```
+
+### Language details
+- **Compiler**: javac
+- **Runtime**: java
+- **Note**: Your main class must match your filename
+
+### Compilation and execution
+
+<Tabs>
+  <Tab title="Unix/Linux/macOS">
+    **Compilation:**
+    ```bash
+    javac -d .qt/ Main.java
+    ```
+    
+    **Execution:**
+    ```bash
+    java -cp .qt/ Main
+    ```
+  </Tab>
+  
+  <Tab title="Windows">
+    **Compilation:**
+    ```bash
+    javac -d .qt/ Main.java
+    ```
+    
+    **Execution:**
+    ```bash
+    java -cp .qt/ Main
+    ```
+  </Tab>
+</Tabs>
+
+<Warning>
+For Java files, the class name must match the filename. For example, if your file is `Main.java`, your public class must be named `Main`.
+</Warning>
+
+---
+
+## C
+
+### File extensions
+```
+.h, .c
+```
+
+### Language details
+- **Standard**: GNU C11
+- **Compiler**: gcc (GNU C Compiler)
+- **Math library**: Automatically linked with `-lm`
+
+### Compilation and execution
+
+<Tabs>
+  <Tab title="Unix/Linux/macOS">
+    **Compilation:**
+    ```bash
+    gcc -std=gnu11 -lm main.c -o .qt/main
+    ```
+    
+    **Execution:**
+    ```bash
+    ./.qt/main
+    ```
+  </Tab>
+  
+  <Tab title="Windows">
+    **Compilation:**
+    ```bash
+    gcc -std=gnu11 -lm main.c -o .qt/main.exe
+    ```
+    
+    **Execution:**
+    ```bash
+    .qt/main.exe
+    ```
+  </Tab>
+</Tabs>
+
+<Info>
+The `-lm` flag links the math library, allowing you to use functions from `<math.h>` without additional configuration.
+</Info>
+
+---
+
+## Rust
+
+### File extensions
+```
+.rs
+```
+
+### Language details
+- **Build tool**: cargo
+- **Edition**: 2021
+- **Pre-installed crates**: proconio, num, rand, regex, num-bigint
+
+### Compilation and execution
+
+<Tabs>
+  <Tab title="Unix/Linux/macOS">
+    **Compilation:**
+    ```bash
+    cp main.rs ~/.quicktest/rust/src/main.rs && \
+    cargo build --release --quiet --manifest-path ~/.quicktest/rust/Cargo.toml && \
+    cp ~/.quicktest/rust/target/release/rust .qt/main
+    ```
+    
+    **Execution:**
+    ```bash
+    ./.qt/main
+    ```
+  </Tab>
+  
+  <Tab title="Windows">
+    **Compilation:**
+    ```bash
+    cp main.rs ~/.quicktest/rust/src/main.rs && \
+    cargo build --release --quiet --manifest-path ~/.quicktest/rust/Cargo.toml && \
+    cp ~/.quicktest/rust/target/release/rust.exe .qt/main.exe
+    ```
+    
+    **Execution:**
+    ```bash
+    .qt/main.exe
+    ```
+  </Tab>
+</Tabs>
+
+### Available dependencies
+
+Quick Test CLI automatically configures a Rust project at `~/.quicktest/rust/` with these dependencies:
+
+```toml
+[dependencies]
+proconio = "0.4.3"
+num = "0.4.0"
+rand = { version = "0.8.5", features = ["small_rng"]}
+regex = "1.5.5"
+num-bigint = "0.4.3"
+```
+
+<Accordion title="Using Rust dependencies in your code">
+```rust
+use proconio::input;
+use num::BigInt;
+use rand::Rng;
+
+fn main() {
+    input! {
+        n: usize,
+        a: [i64; n],
+    }
+    
+    // Use the dependencies
+    println!("Read {} numbers", n);
+}
+```
+</Accordion>
+
+<Info>
+Quick Test CLI initializes the Rust environment on first use. Subsequent compilations reuse the existing project for faster build times.
+</Info>
+
+---
+
+## Go
+
+### File extensions
+```
+.go
+```
+
+### Language details
+- **Compiler**: go
+- **Build mode**: Executable binary
+
+### Compilation and execution
+
+<Tabs>
+  <Tab title="Unix/Linux/macOS">
+    **Compilation:**
+    ```bash
+    cp main.go ~/.quicktest/go_mod/main.go && \
+    go build -buildmode=exe -o ./.qt/main ~/.quicktest/go_mod/main.go
+    ```
+    
+    **Execution:**
+    ```bash
+    ./.qt/main
+    ```
+  </Tab>
+  
+  <Tab title="Windows">
+    **Compilation:**
+    ```bash
+    cp main.go ~/.quicktest/go_mod/main.go && \
+    go build -buildmode=exe -o ./.qt/main.exe ~/.quicktest/go_mod/main.go
+    ```
+    
+    **Execution:**
+    ```bash
+    .qt/main.exe
+    ```
+  </Tab>
+</Tabs>
+
+<Note>
+Quick Test CLI copies your Go file to `~/.quicktest/go_mod/` before building to ensure a clean build environment.
+</Note>
+
+---
+
+## Kotlin
+
+### File extensions
+```
+.kt
+```
+
+### Language details
+- **Compiler**: kotlinc
+- **Runtime**: java
+- **Output format**: JAR file with runtime included
+
+### Compilation and execution
+
+<Tabs>
+  <Tab title="Unix/Linux/macOS">
+    **Compilation:**
+    ```bash
+    kotlinc main.kt -include-runtime -d .qt/main.jar
+    ```
+    
+    **Execution:**
+    ```bash
+    java -jar .qt/main.jar
+    ```
+  </Tab>
+  
+  <Tab title="Windows">
+    **Compilation:**
+    ```bash
+    kotlinc main.kt -include-runtime -d .qt/main.jar
+    ```
+    
+    **Execution:**
+    ```bash
+    java -jar .qt/main.jar
+    ```
+  </Tab>
+</Tabs>
+
+<Info>
+The `-include-runtime` flag bundles the Kotlin runtime with your compiled code, making the JAR file self-contained.
+</Info>
+
+---
+
+## Language detection
+
+Quick Test CLI automatically detects the programming language based on file extensions. You don't need to specify the language explicitly.
+
+<Steps>
+  <Step title="Extension detection">
+    The tool reads the file extension from your target file, correct file, generator file, or checker file.
+  </Step>
+  
+  <Step title="Language mapping">
+    The extension is mapped to one of the supported languages using the internal configuration.
+  </Step>
+  
+  <Step title="Command selection">
+    The appropriate compilation and execution commands are selected based on the detected language and operating system.
+  </Step>
+  
+  <Step title="Automatic execution">
+    Your code is compiled and executed using the correct toolchain.
+  </Step>
+</Steps>
+
+## Customizing compilation
+
+You can customize C++ compilation settings using the `setup` command:
+
+```bash
+qt setup config --label=cpp.compile --value="g++ -std=c++20 -O2 -DONLINE_JUDGE=1 ${FILE_NAME}.cpp -o .qt/${FILE_NAME_BINARY}"
+```
+
+<Warning>
+Customizing compilation commands requires understanding of the Quick Test CLI configuration system. Use with caution.
+</Warning>
+
+## Prerequisites
+
+Before using Quick Test CLI, ensure you have the necessary compilers and interpreters installed:
+
+<Accordion title="Installation check">
+Quick Test CLI verifies that the required compiler/interpreter is installed before running tests. If a tool is missing, you'll see an error message with installation instructions.
+
+You can manually check if a language is available:
+
+```bash
+# C++
+g++ --help
+
+# Python
+python --version
+
+# Java
+java -version
+javac -version
+
+# C
+gcc --help
+
+# Rust
+cargo --version
+
+# Go
+go version
+
+# Kotlin
+kotlinc -version
+```
+</Accordion>
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Test modes" icon="flask" href="/concepts/test-modes">
+    Learn about the different test modes available
+  </Card>
+  
+  <Card title="Getting started" icon="rocket" href="/installation">
+    Install Quick Test CLI on your system
+  </Card>
+</CardGroup>

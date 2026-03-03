@@ -1,0 +1,142 @@
+---
+title: Overview
+description: Understand how Quick Test CLI works and its core architecture
+---
+
+## What is Quick Test CLI?
+
+Quick Test CLI is a cross-platform command-line tool designed for fast and efficient stress testing in competitive programming. It allows you to verify the correctness and performance of your solutions by comparing them against reference implementations, checking time limits, and validating outputs.
+
+## How it works
+
+Quick Test CLI operates through a simple yet powerful workflow:
+
+<Steps>
+  <Step title="Prepare your files">
+    Write your solution file (target file), and depending on the test mode, prepare additional files like a brute-force solution, test case generator, or custom checker.
+  </Step>
+  
+  <Step title="Choose a test mode">
+    Select one of the four test modes based on your testing needs: `cmp`, `stress`, `check`, or `output`.
+  </Step>
+  
+  <Step title="Run the test">
+    Execute Quick Test CLI with the appropriate command and options. The tool automatically compiles your code and runs the tests.
+  </Step>
+  
+  <Step title="Review results">
+    View real-time test results showing AC (Accepted), WA (Wrong Answer), TLE (Time Limit Exceeded), RTE (Runtime Error), or MLE (Memory Limit Exceeded) verdicts.
+  </Step>
+</Steps>
+
+## Core architecture
+
+### Compilation and execution
+
+Quick Test CLI automatically detects the programming language based on file extensions and handles compilation and execution accordingly. All compiled binaries are stored in a `.qt/` directory in your current working directory.
+
+<Info>
+The tool creates a `.qt/` folder for storing compiled binaries and test cases. This folder is automatically managed and can be safely ignored in version control.
+</Info>
+
+### Test case management
+
+Quick Test CLI can generate test cases dynamically using a generator file or use pre-existing test cases with a file prefix:
+
+- **Generator mode**: Runs a generator program to create random test cases on the fly
+- **Prefix mode**: Uses existing test case files matching a specific prefix (e.g., `testcase_ac_1.in`, `testcase_ac_2.in`)
+
+<Warning>
+The `--gen-file` and `--prefix` options conflict with each other. You can only use one at a time.
+</Warning>
+
+### Status verdicts
+
+Quick Test CLI tracks and reports the following verdicts:
+
+<CardGroup cols={2}>
+  <Card title="AC" icon="check">
+    **Accepted** - Your solution produced the correct output within time and memory limits
+  </Card>
+  
+  <Card title="WA" icon="xmark">
+    **Wrong Answer** - Your solution produced incorrect output
+  </Card>
+  
+  <Card title="TLE" icon="clock">
+    **Time Limit Exceeded** - Your solution exceeded the timeout limit (default: 2000ms)
+  </Card>
+  
+  <Card title="RTE" icon="triangle-exclamation">
+    **Runtime Error** - Your solution crashed or exited with an error
+  </Card>
+</CardGroup>
+
+<Card title="MLE" icon="memory">
+  **Memory Limit Exceeded** - Your solution used more memory than allowed (default: 1GB)
+</Card>
+
+### Configuration options
+
+All test modes support common configuration options:
+
+| Option | Alias | Default | Description |
+|--------|-------|---------|-------------|
+| `--timeout` | `--tout` | 2000 | Time limit in milliseconds |
+| `--memory-limit` | `--ml` | 1000000000 | Memory limit in bytes (1GB) |
+| `--test-cases` | `--tc` | 1000 | Number of test cases to run |
+
+## Test case persistence
+
+You can control which test cases are saved using these flags:
+
+<Tabs>
+  <Tab title="Save options">
+    - `--save-all`: Saves all test cases regardless of verdict
+    - `--save-bad`: Saves only failing cases (WA, TLE, RTE, or MLE)
+    - Default: No test cases are saved
+  </Tab>
+  
+  <Tab title="Run options">
+    - `--run-all`: Runs all existing test cases
+    - `--run-ac`: Runs only test cases marked as Accepted
+    - `--run-wa`: Runs only test cases marked as Wrong Answer
+    - `--run-tle`: Runs only test cases marked as Time Limit Exceeded
+    - `--run-rte`: Runs only test cases marked as Runtime Error
+    - `--run-mle`: Runs only test cases marked as Memory Limit Exceeded
+  </Tab>
+  
+  <Tab title="Break options">
+    - `--break-bad` or `--break`: Stops execution immediately when encountering WA, TLE, RTE, or MLE
+  </Tab>
+</Tabs>
+
+<Tip>
+Use `--save-bad` with `--break-bad` to quickly find and save the first failing test case during debugging.
+</Tip>
+
+## Command aliases
+
+Quick Test CLI supports two command formats:
+
+```bash
+quicktest cmp -t main.cpp -c correct.cpp -g gen.cpp
+```
+
+```bash
+qt cmp -t main.cpp -c correct.cpp -g gen.cpp
+```
+
+The `qt` alias provides a faster way to invoke commands during contests.
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Test modes" icon="flask" href="/concepts/test-modes">
+    Learn about the four test modes and when to use each one
+  </Card>
+  
+  <Card title="Supported languages" icon="code" href="/concepts/supported-languages">
+    View compilation commands and language-specific details
+  </Card>
+</CardGroup>

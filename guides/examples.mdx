@@ -1,0 +1,533 @@
+---
+title: Examples
+description: Real-world usage examples for competitive programming workflows
+---
+
+Learn how to use Quick Test CLI effectively with practical examples from real competitive programming scenarios.
+
+## Compare mode (cmp)
+
+Compare your optimized solution against a brute-force correct solution.
+
+### Maximum subarray problem
+
+This example demonstrates finding the maximum sum of a contiguous subarray using Kadane's algorithm.
+
+<Steps>
+  <Step title="Create the generator">
+    ```cpp gen.cpp
+    #include <bits/stdc++.h>
+    using namespace std;
+
+    int main(int argc, char* argv[]) {
+        // Generator for Maximum Subarray Problem
+        int seed = stoi(string(argv[1]));
+        srand(seed);
+
+        const int N = int(1e3);
+        const int Ai = int(1e5);
+
+        int n = rand() % N + 1;
+        cout << n << "\n";
+
+        default_random_engine generator;
+        uniform_int_distribution<int> distribution(-Ai, Ai);
+
+        for(int i = 0; i < n; i++) {
+            if(i > 0) cout << " ";
+            cout << distribution(generator);
+        }
+        return 0;
+    }
+    ```
+
+    The generator creates arrays of random size with positive and negative numbers.
+  </Step>
+
+  <Step title="Write the brute-force solution">
+    ```cpp correct.cpp
+    #include <bits/stdc++.h>
+    using namespace std;
+
+    int main() {
+        // Maximum Subarray Problem - O(n²) brute force
+        int n; cin >> n;
+        vector<int> values(n);
+        for(int &a: values)
+            cin >> a;
+        
+        int best = 0;
+        for (int i = 0; i < n; i++) {
+            int sum = 0;
+            for (int j = i; j < n; j++) {
+                sum += values[j];
+                best = max(best, sum);
+            }
+        }
+        cout << best << "\n";
+        return 0;
+    }
+    ```
+
+    This O(n²) solution is slow but guaranteed correct.
+  </Step>
+
+  <Step title="Write the optimized solution (with bug)">
+    ```cpp main.cpp
+    #include <bits/stdc++.h>
+    using namespace std;
+
+    int main() {
+        // Maximum Subarray Problem - O(n) with intentional bug
+        int n; cin >> n;
+        vector<int> values(n);
+        for(int &a: values)
+            cin >> a;
+        
+        int best = 0, sum = 0;
+        
+        // Bug: i+1 < n instead of i < n
+        for (int i = 0; i+1 < n; i++) {
+            sum = max(values[i], sum + values[i]);
+            best = max(best, sum);
+        }
+        cout << best << "\n";
+        return 0;
+    }
+    ```
+
+    This solution has a bug that will be caught by stress testing.
+  </Step>
+
+  <Step title="Run the stress test">
+    ```bash
+    qt cmp -t main.cpp -c correct.cpp -g gen.cpp --tc 500 --tout 1000 --save-bad --break
+    ```
+
+    Quick Test will find the bug and save the failing test case.
+  </Step>
+</Steps>
+
+<Tip>
+  Use `--break` to stop immediately when a failure is found, then examine the saved test case.
+</Tip>
+
+### Multi-language examples
+
+<Tabs>
+  <Tab title="C++">
+    ```bash
+    # Navigate to examples
+    cd examples/cmp/cpp
+
+    # Run with full options
+    quicktest cmp --target-file=main.cpp --correct-file=correct.cpp --gen-file=gen.cpp --test-cases=500 --timeout=1000
+
+    # Short form
+    qt cmp -t main.cpp -c correct.cpp -g gen.cpp --tc 500 --tout 1000
+    ```
+  </Tab>
+
+  <Tab title="Python">
+    ```bash
+    # Navigate to examples
+    cd examples/cmp/python
+
+    # Run with appropriate timeout (Python is slower)
+    qt cmp -t main.py -c correct.py -g gen.py --tc 200 --tout 3000
+    ```
+
+    <Note>
+      Python typically needs higher timeouts than compiled languages.
+    </Note>
+  </Tab>
+
+  <Tab title="Java">
+    ```bash
+    # Navigate to examples
+    cd examples/cmp/java
+
+    # Main class must be named "Main"
+    qt cmp -t Main.java -c Correct.java -g Gen.java --tc 500 --tout 1000
+    ```
+  </Tab>
+
+  <Tab title="Rust">
+    ```bash
+    # Navigate to examples
+    cd examples/cmp/rust
+
+    # Rust compilation is slower but execution is fast
+    qt cmp -t main.rs -c correct.rs -g gen.rs --tc 500 --tout 1000
+    ```
+  </Tab>
+
+  <Tab title="Go">
+    ```bash
+    # Navigate to examples
+    cd examples/cmp/go
+
+    qt cmp -t main.go -c correct.go -g gen.go --tc 500 --tout 1000
+    ```
+  </Tab>
+
+  <Tab title="Kotlin">
+    ```bash
+    # Navigate to examples
+    cd examples/cmp/kotlin
+
+    qt cmp -t main.kt -c correct.kt -g gen.kt --tc 500 --tout 1000
+    ```
+  </Tab>
+</Tabs>
+
+## Stress mode
+
+Test your solution for time limit issues without comparing against a correct solution.
+
+### When to use stress mode
+
+- You're confident about correctness but want to test performance
+- You don't have a brute-force solution
+- You want to find the worst-case input quickly
+
+<CodeGroup>
+  ```bash C++ example
+  cd examples/stress/cpp
+  qt stress -t main.cpp -g gen.cpp --tc 15 --tout 1000
+  ```
+
+  ```bash Python example
+  cd examples/stress/python
+  qt stress -t main.py -g gen.py --tc 15 --tout 1000
+  ```
+
+  ```bash With saved test cases
+  # First run with static test cases
+  qt stress -t main.cpp -p test_cases/testcase_ac --tout 1000
+
+  # Then stress test with generator
+  qt stress -t main.cpp -g gen.cpp --tc 100 --tout 1000 --save-bad
+  ```
+</CodeGroup>
+
+## Check mode
+
+Use a custom checker for problems with multiple valid answers.
+
+### Factorization problem
+
+Problem: Given n, output two numbers that multiply to n.
+
+<Steps>
+  <Step title="Write the checker">
+    ```cpp checker.cpp
+    #include <bits/stdc++.h>
+    using namespace std;
+
+    int main() {
+        // Checker validates that x * y == n
+        
+        // Read n from input file
+        ifstream in (".qt/input.txt");
+        int n; in >> n;
+
+        // Read answer from target program's output
+        int x, y;
+        cin >> x >> y;
+
+        // Validate the answer
+        cout << (x*y == n ? "YES" : "NO") << endl;
+        
+        return 0;
+    }
+    ```
+
+    The checker reads the input from `.qt/input.txt` and validates the solution's output.
+  </Step>
+
+  <Step title="Create the generator">
+    ```cpp gen.cpp
+    #include <bits/stdc++.h>
+    using namespace std;
+
+    int main(int argc, char* argv[]) {
+        int seed = stoi(string(argv[1]));
+        srand(seed);
+
+        // Generate a random number
+        int n = rand() % 1000 + 1;
+        cout << n << "\n";
+        
+        return 0;
+    }
+    ```
+  </Step>
+
+  <Step title="Write the solution">
+    ```cpp main.cpp
+    #include <bits/stdc++.h>
+    using namespace std;
+
+    int main() {
+        int n; cin >> n;
+        
+        // Find two factors (many valid answers exist)
+        for(int i = 2; i * i <= n; i++) {
+            if(n % i == 0) {
+                cout << i << " " << n/i << "\n";
+                return 0;
+            }
+        }
+        
+        // n is prime
+        cout << 1 << " " << n << "\n";
+        return 0;
+    }
+    ```
+  </Step>
+
+  <Step title="Run with checker">
+    ```bash
+    cd examples/check/cpp
+    qt check -t main.cpp -c checker.cpp -g gen.cpp --tc 500 --tout 1000
+    ```
+  </Step>
+</Steps>
+
+<Warning>
+  The checker must output "YES" for correct answers and "NO" for incorrect answers.
+</Warning>
+
+## Output mode
+
+Run your solution against pre-made test cases and optionally save outputs.
+
+### Using static test files
+
+<Steps>
+  <Step title="Prepare test cases">
+    Create test files with a common prefix:
+
+    ```
+    test_cases/
+    ├── testcase_ac_01.txt
+    ├── testcase_ac_02.txt
+    └── testcase_ac_03.txt
+    ```
+
+    Each file contains one test case input.
+  </Step>
+
+  <Step title="Run against test cases">
+    <Tabs>
+      <Tab title="View output only">
+        ```bash
+        qt output -t cpp/main.cpp -p test_cases/testcase_ac
+        ```
+
+        This displays outputs in the terminal.
+      </Tab>
+
+      <Tab title="Save outputs to files">
+        ```bash
+        qt output -t cpp/main.cpp -p test_cases/testcase_ac --save-out
+        ```
+
+        Outputs are saved alongside input files:
+        ```
+        test_cases/
+        ├── testcase_ac_01.txt
+        ├── testcase_ac_01.out.txt
+        ├── testcase_ac_02.txt
+        ├── testcase_ac_02.out.txt
+        └── ...
+        ```
+      </Tab>
+    </Tabs>
+  </Step>
+</Steps>
+
+<CodeGroup>
+  ```bash C++ example
+  cd examples/output
+  qt output -t cpp/main.cpp -p test_cases/testcase_ac --save-out
+  ```
+
+  ```bash Python example
+  cd examples/output
+  qt output -t python/main.py -p test_cases/testcase_ac --save-out
+  ```
+
+  ```bash With timeout
+  qt output -t main.cpp -p test_cases/testcase_ac --tout 2000 --save-out
+  ```
+</CodeGroup>
+
+## Real contest workflow
+
+Here's a typical workflow during a competitive programming contest:
+
+<Steps>
+  <Step title="Initial setup">
+    ```bash
+    mkdir problem-a
+    cd problem-a
+    touch main.cpp gen.cpp correct.cpp
+    ```
+  </Step>
+
+  <Step title="Write and test brute force">
+    ```bash
+    # Write correct.cpp (brute force solution)
+    # Test with sample inputs first
+    qt output -t correct.cpp -p samples/input
+    ```
+  </Step>
+
+  <Step title="Develop optimized solution">
+    ```bash
+    # Write main.cpp (optimized solution)
+    # Write gen.cpp (random test generator)
+    
+    # Quick test with few cases
+    qt cmp -t main.cpp -c correct.cpp -g gen.cpp --tc 50 --break
+    ```
+  </Step>
+
+  <Step title="Comprehensive testing">
+    ```bash
+    # If quick test passes, run more thorough tests
+    qt cmp -t main.cpp -c correct.cpp -g gen.cpp --tc 1000 --save-bad --break
+    ```
+  </Step>
+
+  <Step title="Debug if needed">
+    ```bash
+    # If failures found, check saved test case
+    cat .qt/testcases/testcase_wa_001.txt
+    
+    # Fix bug, then re-test failed cases
+    qt cmp -t main.cpp -c correct.cpp -g gen.cpp --run-wa
+    ```
+  </Step>
+
+  <Step title="Final validation">
+    ```bash
+    # Test with official samples
+    qt output -t main.cpp -p samples/input
+    
+    # One more stress test
+    qt cmp -t main.cpp -c correct.cpp -g gen.cpp --tc 2000 --break
+    ```
+  </Step>
+
+  <Step title="Submit">
+    You're ready to submit `main.cpp` to the judge!
+  </Step>
+</Steps>
+
+## Advanced patterns
+
+### Finding worst-case input
+
+```bash
+# Save all test cases
+qt stress -t main.cpp -g gen.cpp --tc 1000 --save-all
+
+# Analyze which inputs cause slowest execution
+# Check .qt/testcases/ for patterns
+```
+
+### Testing edge cases
+
+```bash
+# Create edge case test files manually
+echo "1\n0" > test_cases/edge_01.txt
+echo "100000\n1 2 3 ..." > test_cases/edge_02.txt
+
+# Test against edge cases
+qt cmp -t main.cpp -c correct.cpp -p test_cases/edge
+```
+
+### Batch testing multiple solutions
+
+```bash
+# Test solution v1
+qt cmp -t main_v1.cpp -c correct.cpp -g gen.cpp --tc 500
+
+# Test solution v2
+qt cmp -t main_v2.cpp -c correct.cpp -g gen.cpp --tc 500
+
+# Compare performance
+```
+
+### Interactive debugging
+
+```bash
+# Run with --diff to see exact differences
+qt cmp -t main.cpp -c correct.cpp -g gen.cpp --diff --break
+
+# When it stops, check the input/output
+cat .qt/input.txt
+cat .qt/output.txt
+
+# Debug with your solution
+gdb .qt/main < .qt/input.txt
+```
+
+## Tips and best practices
+
+<AccordionGroup>
+  <Accordion title="Start small, scale up">
+    Begin with a small number of test cases (`--tc 10`) to verify everything works, then increase:
+
+    ```bash
+    qt cmp -t main.cpp -c correct.cpp -g gen.cpp --tc 10
+    # If pass, increase
+    qt cmp -t main.cpp -c correct.cpp -g gen.cpp --tc 100
+    # Finally
+    qt cmp -t main.cpp -c correct.cpp -g gen.cpp --tc 1000
+    ```
+  </Accordion>
+
+  <Accordion title="Use --break during development">
+    Stop immediately on first failure to debug quickly:
+
+    ```bash
+    qt cmp -t main.cpp -c correct.cpp -g gen.cpp --break --save-bad
+    ```
+  </Accordion>
+
+  <Accordion title="Adjust timeouts appropriately">
+    - For fast problems: `--tout 500`
+    - For standard problems: `--tout 1000` or `--tout 2000`
+    - For Python/interpreted languages: increase by 2-3x
+  </Accordion>
+
+  <Accordion title="Keep generators simple">
+    Your generator should:
+    - Accept a seed argument
+    - Generate valid inputs only
+    - Cover edge cases (min/max values, empty inputs)
+  </Accordion>
+
+  <Accordion title="Test before submitting">
+    Always run a final stress test before submitting:
+
+    ```bash
+    qt cmp -t main.cpp -c correct.cpp -g gen.cpp --tc 2000 --break
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="CLI Reference" icon="terminal" href="/reference/command-options">
+    View all available commands and options
+  </Card>
+  <Card title="Troubleshooting" icon="wrench" href="/guides/troubleshooting">
+    Fix common issues
+  </Card>
+</CardGroup>

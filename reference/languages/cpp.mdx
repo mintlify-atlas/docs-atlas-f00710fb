@@ -1,0 +1,123 @@
+---
+title: C++ Support
+description: Complete reference for C++ language support in Quick Test CLI
+---
+
+Quick Test CLI provides full support for C++ with automatic compilation and execution of your competitive programming solutions.
+
+## File Extension
+
+C++ files must use the `.cpp` extension:
+
+```cpp
+main.cpp
+correct.cpp
+gen.cpp
+```
+
+## Compilation
+
+C++ files are compiled using `g++` with the following command:
+
+```bash
+g++ -std=c++17 -Wall -DONLINE_JUDGE=1 -o .qt/main main.cpp
+```
+
+### Compilation Flags
+
+- `-std=c++17` - Uses C++17 standard
+- `-Wall` - Enables all compiler warnings
+- `-DONLINE_JUDGE=1` - Defines the `ONLINE_JUDGE` macro for conditional compilation
+- `-o .qt/main` - Outputs the compiled binary to `.qt/main`
+
+<Note>
+The `ONLINE_JUDGE` macro allows you to write code that behaves differently in local testing vs online judges.
+</Note>
+
+## Execution
+
+After compilation, the binary is executed with:
+
+```bash
+./.qt/main
+```
+
+## Example Code
+
+Here's a typical C++ solution for competitive programming:
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    // Maximum Subarray Problem
+
+    int n; cin >> n;
+    vector<int> values(n);
+    for(int &a: values)
+        cin >> a;
+    
+    int best = 0, sum = 0;
+    
+    for (int i = 0; i < n; i++) {
+        sum = max(values[i], sum + values[i]);
+        best = max(best, sum);
+    }
+    cout << best << "\n";
+    
+    return 0;
+}
+```
+
+## Usage with Quick Test
+
+### Compare Mode (cmp)
+
+Compare your solution against a brute-force correct solution:
+
+```bash
+quicktest cmp --target-file=main.cpp --correct-file=correct.cpp --gen-file=gen.cpp
+```
+
+### Stress Testing Mode
+
+Test your solution's performance:
+
+```bash
+quicktest stress --target-file=main.cpp --gen-file=gen.cpp --tout 1000 --tc 1000
+```
+
+### Checker Mode
+
+For problems with multiple valid answers:
+
+```bash
+quicktest check --target-file=main.cpp --checker-file=checker.cpp --gen-file=gen.cpp
+```
+
+## Requirements
+
+<Warning>
+You must have `g++` installed on your system to compile C++ files.
+</Warning>
+
+Verify your installation:
+
+```bash
+g++ --version
+```
+
+## Common Headers
+
+The `#include <bits/stdc++.h>` header is a non-standard GCC header that includes most C++ standard library headers. While convenient for competitive programming, it's not recommended for production code.
+
+<Tip>
+For faster compilation during practice, you can modify the compilation command in `~/.quicktest/languages.config.json` to include precompiled headers or change optimization flags.
+</Tip>
+
+## Platform Support
+
+- **Linux**: Full support
+- **Windows**: Full support
+- **macOS**: Full support

@@ -1,0 +1,159 @@
+---
+title: Python Support
+description: Complete reference for Python language support in Quick Test CLI
+---
+
+Quick Test CLI provides full support for Python 3 with direct execution of your competitive programming solutions.
+
+## File Extension
+
+Python files must use the `.py` extension:
+
+```python
+main.py
+correct.py
+gen.py
+```
+
+## Execution
+
+Python files are executed directly without compilation:
+
+```bash
+python3 main.py
+```
+
+<Info>
+Quick Test CLI uses Python 3 by default. Python 2 is not supported.
+</Info>
+
+## Example Code
+
+Here's a typical Python solution for competitive programming:
+
+```python
+# Maximum Subarray Problem - slow version
+
+n = int(input())
+values = list(map(int, input().split()))
+
+best = 0
+
+for i in range(n):
+    sum = 0
+    for j in range(i, n):
+        sum += values[j]
+        best = max(best, sum)
+
+print(best)
+```
+
+## Usage with Quick Test
+
+### Compare Mode (cmp)
+
+Compare your solution against a brute-force correct solution:
+
+```bash
+quicktest cmp --target-file=main.py --correct-file=correct.py --gen-file=gen.py
+```
+
+### Stress Testing Mode
+
+Test your solution's performance:
+
+```bash
+quicktest stress --target-file=main.py --gen-file=gen.py --tout 2000 --tc 1000
+```
+
+### Checker Mode
+
+For problems with multiple valid answers:
+
+```bash
+quicktest check --target-file=main.py --checker-file=checker.py --gen-file=gen.py
+```
+
+## Requirements
+
+<Warning>
+You must have Python 3 installed on your system to run Python files.
+</Warning>
+
+Verify your installation:
+
+```bash
+python3 --version
+```
+
+## Performance Considerations
+
+<Note>
+Python is generally slower than compiled languages like C++ or Java. Be aware of timeout limits when using Python for competitive programming.
+</Note>
+
+### Tips for Faster Python Code
+
+1. **Use fast I/O** for large inputs:
+
+```python
+import sys
+input = sys.stdin.readline
+```
+
+2. **Avoid unnecessary operations** in tight loops
+
+3. **Use built-in functions** which are implemented in C and are faster
+
+4. **Consider PyPy** as an alternative Python interpreter for better performance
+
+## Common Patterns
+
+### Reading Input
+
+```python
+# Single integer
+n = int(input())
+
+# Multiple integers on one line
+a, b, c = map(int, input().split())
+
+# List of integers
+values = list(map(int, input().split()))
+
+# Multiple lines
+data = []
+for _ in range(n):
+    data.append(int(input()))
+```
+
+### Random Number Generation
+
+Useful for test case generators:
+
+```python
+import random
+
+# Random integer in range
+n = random.randint(1, 100)
+
+# Random list
+values = [random.randint(1, 1000) for _ in range(n)]
+```
+
+## Standard Library
+
+<Tip>
+Python's extensive standard library can be very helpful in competitive programming. Common useful modules include:
+- `collections` - Specialized container datatypes
+- `itertools` - Iterator building blocks
+- `heapq` - Heap queue algorithm
+- `bisect` - Array bisection algorithm
+- `math` - Mathematical functions
+</Tip>
+
+## Platform Support
+
+- **Linux**: Full support
+- **Windows**: Full support
+- **macOS**: Full support
