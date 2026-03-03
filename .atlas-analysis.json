@@ -1,0 +1,96 @@
+{
+  "projectType": "cli-tool",
+  "projectName": "Quick Test CLI",
+  "projectDescription": "A cross-platform CLI for automated stress testing in competitive programming",
+  "theme": "aspen",
+  "primaryColor": "#FF6B35",
+  "lightColor": "#FFB89D",
+  "darkColor": "#C74A2A",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "installation",
+              "quickstart"
+            ]
+          },
+          {
+            "group": "Core Concepts",
+            "pages": [
+              "concepts/overview",
+              "concepts/test-modes",
+              "concepts/supported-languages"
+            ]
+          },
+          {
+            "group": "Commands",
+            "pages": [
+              "commands/cmp",
+              "commands/stress",
+              "commands/check",
+              "commands/output",
+              "commands/setup"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "guides/getting-started",
+              "guides/configuration",
+              "guides/examples",
+              "guides/troubleshooting"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Reference",
+        "groups": [
+          {
+            "group": "CLI Reference",
+            "pages": [
+              "reference/command-options",
+              "reference/flags",
+              "reference/exit-codes"
+            ]
+          },
+          {
+            "group": "Language Support",
+            "pages": [
+              "reference/languages/cpp",
+              "reference/languages/java",
+              "reference/languages/python",
+              "reference/languages/rust",
+              "reference/languages/go",
+              "reference/languages/c",
+              "reference/languages/kotlin"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Compare solutions against brute-force reference implementations",
+    "Stress test code with random test case generation",
+    "Custom checker support for problems with multiple valid answers",
+    "Cross-platform support for Windows, Linux, and macOS",
+    "Multi-language support (C++, Java, Python, Rust, Go, C, Kotlin)",
+    "Configurable timeout and memory limits",
+    "Test case management with save and replay capabilities"
+  ],
+  "publicApiSurface": [
+    "quicktest cmp",
+    "quicktest stress",
+    "quicktest check",
+    "quicktest output",
+    "quicktest setup",
+    "quicktest example",
+    "qt (alias for quicktest)"
+  ]
+}
