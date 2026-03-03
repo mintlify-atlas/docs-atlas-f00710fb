@@ -114,17 +114,17 @@ qt check -t main.cpp -c checker.cpp -g gen.cpp
 
 ## Control Flags
 
-<ParamField path="break-bad" type="boolean" default="false">
+<ParamField path="break_bad" type="boolean" default="false">
   Stop execution immediately when a WA (Wrong Answer), TLE (Time Limit Exceeded), or RTE (Runtime Error) occurs.
   
   **Aliases:** `--break`, `-b`
   
-  <Note>
-  Note the underscore in the code: `break_bad` (line 198 in opt.rs)
-  </Note>
+  <Warning>
+  The `check` command uses `--break_bad` (with underscore) unlike other commands which use `--break-bad` (with hyphen). This is a quirk in the source code.
+  </Warning>
   
   ```bash
-  --break-bad
+  --break_bad
   --break
   -b
   ```
@@ -403,7 +403,7 @@ QuickTest displays real-time results:
 </Tip>
 
 <Tip>
-**Use --break-bad for debugging:** Stop at the first failure to investigate the issue immediately.
+**Use --break_bad for debugging:** Stop at the first failure to investigate the issue immediately.
 </Tip>
 
 <Tip>

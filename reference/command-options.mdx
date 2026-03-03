@@ -82,12 +82,16 @@ quicktest stress --target-file <FILE> [OPTIONS]
 
 ### Behavior Flags
 
-<ParamField path="--break-bad" type="boolean">
-  Break execution if TLE or RTE status occurs.
+<ParamField path="--break_bad" type="boolean">
+  Break execution if WA, TLE, or RTE status occurs.
   
   **Short flag:** `-b`
   
   **Alias:** `--break`
+  
+  <Warning>
+  The `check` command uses `--break_bad` (underscore) unlike other commands which use `--break-bad` (hyphen).
+  </Warning>
 </ParamField>
 
 <ParamField path="--save-bad" type="boolean">
